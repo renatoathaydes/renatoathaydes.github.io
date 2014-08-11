@@ -1,4 +1,7 @@
-# Programming in Ceylon - for beginners
+---
+layout: post
+title: Programming in Ceylon - for beginners
+---
 
 Ceylon is a programming language that was designed from scratch to work in at least 2 different platforms:
 
