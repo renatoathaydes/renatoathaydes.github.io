@@ -19,7 +19,7 @@ code {
     font-family: 'Courier', monospace;
 }
 
-:not(pre code), code {
+code:not(pre code) {
     font-family: 'Courier', monospace;
     background-color: #EEE;
     padding: 1px 5px 2px;
