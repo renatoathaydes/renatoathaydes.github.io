@@ -346,7 +346,7 @@ To try this out, you can do something like this:
 
 {% highlight ceylon %}
 value x = askUserForNumber("Enter a number (x): ");
-print(x exists then "Thank you! x is `x`" else "Sorry, that's not a number.");
+print(x exists then "Thank you!" else "Sorry, that's not a number.");
 {% endhighlight %}
 
 > We show above how you can use `then` ... `else` directly in a single expression... you just need something that evaluates
