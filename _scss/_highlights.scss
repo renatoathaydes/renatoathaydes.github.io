@@ -14,8 +14,12 @@
   word-break: break-all;
   word-wrap: break-word;
 }
- 
+
 code {
+    font-family: 'Courier', monospace;
+}
+
+:not(pre code), code {
     font-family: 'Courier', monospace;
     background-color: #EEE;
     padding: 1px 5px 2px;
