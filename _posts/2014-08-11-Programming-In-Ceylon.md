@@ -49,16 +49,19 @@ To get started with Ceylon, we must create a module, which is the top-level unit
 
 Click on `File`, select `New` and then `Ceylon Module`. Enter a module name, such as `helloCeylon`, and click on `Finish`.
 
-> Notice that Ceylon Module names can only contain alpha-numeric characters (and `_`) and must not start with a number or capital-letter. Also notice that every Ceylon module has a version! This is an awesome feature that Ceylon, unlike most languages, has built into the language itself and which makes Ceylon code highly modular, but that's a little bit of an advanced topic for now!
+> Notice that Ceylon Module names can only contain alpha-numeric characters (and `_`) and must not start with a number or capital-letter.
+ The same limitation applies to function and variable names (soon you will see what these words mean).
+ Also notice that every Ceylon module has a version! This is an awesome feature that Ceylon, unlike most languages,
+ has built into the language itself and which makes Ceylon code highly modular, but that's a little bit of an advanced topic for now!
 
 You should now have a source file called `run.ceylon` with the following contents:
 
-```ceylon
+{% highlight ceylon %}
 "Run the module `helloCeylon`."
 shared void run() {
     
 }
-```
+{% endhighlight %}
 
 The name of the file does not matter much, as long as it has the `.ceylon` extension.
 The function name, which for the above code is `run`, also does not matter, but it's a Ceylon
@@ -87,39 +90,59 @@ This is the famous Hello World program, which is almost always the first program
 As you can see, it's pretty simple in Ceylon! We invoke a another function called `print`, which Ceylon provides to us, with
 an argument `"Hello World!"`. We must use quotes so that Ceylon understands that we want it to treat as plain text, not some
 kind of function call or anything else. We need to add a `;` at the end to indicate that our statement is complete (like a `.` in
-the end of this sentence).
+the end of this sentence). You could write more than one statement in one line:
 
-Plain text like `"Hello World!"` is referred to as a `String` in the programming world (not only in Ceylon).
+{% highlight ceylon %}
+print("Hello"); print("Hi there"); print("I said hi!");
+{% endhighlight %}
+
+But this makes it harder to understand the code, so it is almost always better to have one statement only per line.
 
 But now, let's get to the real fun and run our first program! 
 
 Click on the green play button on the top of the screen. In the bottom pane called `Console` (should be near the bottom-right
  of the screen), you should see the message we asked to be printed, `Hello World!`.
 
-You can change the text in the String (between quotes) to anything you like! Well, almost anything...
+You can change the text in the `String` (between quotes) to anything you like! Well, almost anything...
 
-Ceylon allows you to include variables, or `value`s, in a String. To do that, we must first understand what a variable is.
+Ceylon allows you to include `value`s, in a String. But to do that, we must first understand what a value is.
 
-The following code illustrates how we can declare a variable called `name` with contents `"John"`
+## Types and values
+
+Plain text like `"Hello World!"` is referred to as a `String` in the programming world (not only in Ceylon).
+There are many other **types**, as these things are called, that you can use. For example:
+
+* `Integer`: integers such as `-2, -1, 0, 1, 2, 3 ...`
+* `Float`: floating-point numbers like `-2.0, -1.9, ..., 12_345.678 ...`
+* `Boolean`: either the value `true` or `false`, one of the most useful types in any program!
+* `Char`: characters (Unicode) like ` 'a', 'b', 'A', 'z', '\{#03C0}' ` (the last of which is the beloved constant `pi`!)
+* `Null`: a type with only one possible value, `null` (meaning the absence of any value, something that comes in handy quite often)
+
+We can also define our own types, but we will have to wait a little bit before we do that!
+
+The following code illustrates how we can declare a value called `name` with contents `"John"`
 (in other words, a `String` of value `"John"`):
 
-```ceylon
+{% highlight ceylon %}
 value name = "John";
-```
+{% endhighlight %}
 
-This is equivalent to writing `String name = "John"`, but Ceylon already knows that `"John"` must be a String, so you don't
-need to tell it that!
+This is equivalent to writing `String name = "John"`, but Ceylon already knows that `"John"` must be a String, so you
+ usually don't need to tell it that (sometimes you need to so that code in other parts of your program can also know
+ the type of a certain value)!
 
-`value` is a Ceylon keyword, and as such, you must not call your variables `value`. Other Ceylon keywords are `void`,
-`for`, `while` and `in`, which are instructions we will get back to shortly...
+`value` is a Ceylon keyword, and as such, you must not call something in your program `value`. There's quite a few reserved
+[keywords](http://ceylon-lang.org/documentation/1.0/spec/html/lexical.html#identifiersandkeywords) in Ceylon
+(which are necessary for it to be able to interpret your programs)... for example, a few of them are `void`,
+`if`, `then`, `else`, `for`, `while` and `in`, which are instructions we will get back to shortly...
 
 Now, instead of just printing a fixed String, let's make Ceylon print a String containing our value (paste this inside
  the `run` function):
 
-```ceylon
+{% highlight ceylon %}
 value name = "John";
 print("Hello ``name``!");
-```
+{% endhighlight %}
 
 If you run this program, you should see the message `Hello John!`! That's because, by wrapping `name` between back-quotes ` `` `,
 we made Ceylon interpret `name` as not plain text, but as an arbitrary Ceylon expression.
@@ -128,28 +151,30 @@ You may be asking yourself: but why not just write `print("Hello John!");`? and 
 for this basic example... but let's now change our program slightly to ask the person running the program to enter a value,
 then print *Hello* to the name given:
 
-```ceylon
+{% highlight ceylon %}
 value name = process.readLine();
 print("Hello ``name``!");
-```
+{% endhighlight %}
 
 > `process` is an `object` that is always available in Ceylon... to see what it can do, just type `process.` in the IDE
-> and wait for the IDE to show you (hitting Ctrl+Space will bring a popup with suggestions from anywhere!).
+ and wait for the IDE to show you (hitting Ctrl+Space will bring a popup with suggestions from anywhere!).
 
 Now, when you run this program, you will notice it will not print anything until you actually type something into the console
  window and hit Enter. But after you do that, you should see our greeting message printed with whatever value you entered.
 
 This is really awesome, isn't it?
 
+## A little maths fun
+
 How about a program that does maths for us?
 
 That's pretty simple, here's some examples:
 
-```ceylon
+{% highlight ceylon %}
 value x = 2 + 2;
 value y = 123 * 456;
 print("x is ``x`` and y is ``y``");
-```
+{% endhighlight %}
 
 Which prints:
 
@@ -159,7 +184,7 @@ x is 4 and y is 56088
 
 You could even ask the user to enter numbers to use in the calculation:
 
-```ceylon
+{% highlight ceylon %}
 process.write("Enter a number (x): ");
 value userX = process.readLine();
 value x = parseFloat(userX);
@@ -172,29 +197,40 @@ if (exists x, exists y) {
 } else {
     print("You must enter numbers!");
 }
-```
+{% endhighlight %}
+
+> Most of the syntax used above will be explained in the next section
 
 The `write` method of `process` prints something to the console, just like `print`, but it does not create a new line
 after printing (unlike `print`, which is really just short for `process.writeLine`).
 
-If you run this program, then enter 3 for x and 5 for y, the program should print:
+If you run this program, then enter `3` for `x` and `5` for `y`, the program should print:
 
 ```
 3.0 * 5.0 = 15.0
 ```
 
-Neat! Now you will never have to do multiplication in your head again!
+Neat! Now you will never have to do multiplication in your calculator again!
 
-We made use of another Ceylon function, `parseFloat`, to turn the `String` the user entered into a `Float`
-(ie. a floating-point number) so that we can actually multiply the numbers.
+Actually you could have used many other mathematical operators: `+` (plus), `-` (minus), `/` (division),
+`%` (remainder), `^` (exponential)... you can use Ceylon as a powerful calculator:
 
-But notice that after we get values for `x` and `y`, there is a an interesting new construct:
+{% highlight ceylon %}
+print(((2.5 * 3.0) ^ 2) + ((10_000 / 7)  % 37));
+{% endhighlight %}
 
-```ceylon
+## Using functions and the 'if' statement
+
+In the previous section, we made use of another Ceylon function, `parseFloat`, to turn the `String` the user entered with
+ the keyboard into a `Float` (ie. a floating-point number) so that we can actually multiply the numbers.
+
+But notice that after we get values for `x` and `y`, there is an interesting new construct:
+
+{% highlight ceylon %}
 if (exists x, exists y) { ... } else { ... }
-```
+{% endhighlight %}
 
-What this does is, first it checks if `x` exists... that's necessary because the user might have entered something that's
+What this does is: first it checks if `x` exists... that's necessary because the user might have entered something that's
 not a number for `x`, in which case the function `parseFloat` would not have been able to return a `Float` number at all!
 But if `x` exists, it then checks if `y` also exists... only if that's the case, the code between the braces will be executed.
 
@@ -206,7 +242,31 @@ as a value for `x`, what does it return??? The answer is the object called `null
 now, it's enough to say that `parseFloat` gives us either a `Float` or `null`, and because we cannot multiply something with
 `null`, we must make sure that what we have is not `null` (which is what `exists` does), which means it must be a `Float`.
 
-## Calling your own functions
+You can try using `if` with any *boolean* expression (something that evaluates to either `true` or `false`).
+
+For example:
+
+{% highlight ceylon %}
+if (5 > 0) {
+    print("Ceylon knows that 5 is greater than 0!");
+}
+
+value x = 10;
+
+if (x <= 0) {
+    print("This will be printed if x is less than, or equal to 0");
+} else if (x <= 5) {
+    print("This is printed if x is between 1 and 5");
+} else {
+    print("This is printed if x is greater than 5");
+}
+
+if (4 == 4) {
+    print("The '==' operator checks for equality... 4 is equal to 4!");
+}
+{% endhighlight %}
+
+## Creating and calling your own functions
 
 We have now used a few Ceylon built-in functions: `print` and `parseFloat`, for example. We can also define our own functions
 and call them just like we call those functions.
@@ -217,12 +277,12 @@ This is very useful to make our code more understandable. It is considered good 
 As an example, we could take the previous example and, instead of doing everything in one single function, break it apart
 into a few functions, as shown below:
 
-```ceylon
+{% highlight ceylon %}
 shared void run() {
 	value x = askUserForNumber("Enter a number (x): ");
 	value y = askUserForNumber("Enter a number (y): ");
 
-	printMultiplicationResult(x, y);
+    printMultiplicationResult(x, y);
 }
 
 Float? askUserForNumber(String question) {
@@ -238,13 +298,13 @@ void printMultiplicationResult(Float? x, Float? y) {
 		print("You must enter numbers!");
 	}
 }
-```
+{% endhighlight %}
 
 This program may be a little longer than our original one, but writing code like this has several benefits:
 
 * every function you write can be re-used in many places (make it `shared` if you want to maximize re-usability).
 * you only need to keep a small amount of information in your head when you are trying to understand what the code does
-  because each function is small
+  because each function is small.
 * each functionality is isolated from others and explicitly declares what is relevant information (its arguments) for it
   to do its job, and what is gives back (the return type).
 
@@ -262,11 +322,13 @@ If the name of the function is not enough for us to understand what it does, wel
 but we should also look at the type signature of the function, which is basically the types of the arguments (what we pass in)
 and the type of the return value (what we get out). This is valuable information!
 
+## Union types
+
 Look at the type signature of `askUserForNumber`:
 
-```ceylon
+{% highlight ceylon %}
 Float? askUserForNumber(String question) { ... }
-```
+{% endhighlight %}
 
 We can see that we must provide a `String` with a question (likely a question to be shown to the user) and we get back a
 `Float?`. Here we have a very interesting new concept to learn, which is called union types.
@@ -275,10 +337,21 @@ We can see that we must provide a `String` with a question (likely a question to
 or return values of different types. That's why union types exist.
 
 `Float?` is synonym with `Float | Null`, which reads as *float or null*. This means that a value of this type must either
-be a `Float` (`0.0, 1.0, 23.555, -34.1`) or a `null` (the only value of the `Null` type).
+be a `Float` or a `null`.
 
 This makes sense, because when we ask the user to enter a number, we cannot be sure that the user is always going to give us
 something that is a valid number.
+
+To try this out, you can do something like this:
+
+{% highlight ceylon %}
+value x = askUserForNumber("Enter a number (x): ");
+print(x exists then "Thank you! x is `x`" else "Sorry, that's not a number.");
+{% endhighlight %}
+
+> We show above how you can use `then` ... `else` directly in a single expression... you just need something that evaluates
+to a Boolean before `then`, and something that evaluates to some value whether that's true or not.
+
 
 
 
