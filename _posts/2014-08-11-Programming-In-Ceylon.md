@@ -76,12 +76,12 @@ and `void` means that the function does not return anything. Other functions mig
 
 We can make Ceylon write something out (`print` in programmer's jargon) by changing the contents of `run.ceylon` to this:
 
-```ceylon
+{% highlight ceylon %}
 "Run the module `helloCeylon`."
 shared void run() {
     print("Hello World!");    
 }
-```
+{% endhighlight %}
 
 This is the famous Hello World program, which is almost always the first program you write when learning a programming language!
 As you can see, it's pretty simple in Ceylon! We invoke a another function called `print`, which Ceylon provides to us, with
