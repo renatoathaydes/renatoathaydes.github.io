@@ -30,8 +30,8 @@ In recent years, there has been an explosion on the number of programming langua
 learn them, some of which even "compile" to other languages! The number is almost certainly in the thousands, though it is
 hard to know how many languages are actually used by more than just a few people.
 
-The big, dominant languages, are currently just a few: Java, C++, C#, Python, JavaScript, besides LISP (under many varieties)
-are probably the main ones.
+The big, dominant languages, on the other hand, are currently just a few: Java, C++, C#, Python, JavaScript, besides LISP
+(under many varieties) are probably the main ones.
 
 Newer languages incorporate lessons learned in previous generations of languages to make programming easier and more efficient.
 And a lot of lessons have been learned in the half-century people have been using higher level languages.
@@ -41,19 +41,19 @@ to attempt to improve on their predecessors and find the perfect balance between
 conciseness.
 
 To get the balance right is very difficult. But out of the newest wave of languages, one stands out for having an incredibly
-powerful and disciplined, yet simple and accessible philosophy: the [Ceylon programming language](http://ceylon-lang.org/).
+powerful and disciplined, yet simple and accessible character: the [Ceylon programming language](http://ceylon-lang.org/).
 
 ## What is Ceylon
 
 Ceylon is a direct [descendant of Java](http://ceylon-lang.org/documentation/1.0/faq/#what_is_ceylon),
 which is a language that has been battle-tested in all sorts of conditions (in small and very large applications) and despite
-its shortcomings, proven to be a great tool for developing almost any sort of application. Ceylon improves on Java but also
-takes lessons from many other languages, packaging everything into a highly concise unit which really makes programming a
+its shortcomings, proven to be a great tool for developing almost any sort of application. Ceylon improves on Java's foundations
+but also takes lessons from many other languages, packaging everything into a highly concise unit which really makes programming a
 pleasurable experience.
 
-Amongst the [main goals](http://ceylon-lang.org/blog/2012/01/10/goals/) of Ceylon are to achieve high readability and
-predictability. These are extremely important in programming. When you read some code, you should be able to immediately
-know what it is trying to achieve, even if you are not familiar with all the details of the software.
+Amongst the [many goals](http://ceylon-lang.org/blog/2012/01/10/goals/) of Ceylon, to achieve high readability and
+predictability are the top ones. These are extremely important in programming. When you read some code, you should be able
+to immediately know what it is trying to achieve, even if you are not familiar with all the details of the software.
 
 Ceylon was designed from scratch to work in at least 2 different platforms:
 
@@ -360,7 +360,7 @@ shared void run() {
 First, we define a simple function that just asks the user for a number. As it is a top-level function (ie. not nested
 inside another function), we must declare its return type (which is the same as `parseFloat`'s return type).
 
-Now, inside the `run` function, we defined two new functions, ``multiply` and `add`, using the short notation for functions
+Now, inside the `run` function, we defined two new functions, `multiply` and `add`, using the short notation for functions
 with the fat arrow `=>`.
 This kind of function can only contain one expression. This is a very common style in Ceylon because usually functions
 are broken up into many smaller functions until they become a simple expression. The long notation for functions is to
@@ -387,7 +387,7 @@ Finally, we call `printResult` using the appropriate operation.
 
 Below are some sample runs of the above program:
 
-```
+{% highlight %}
 Enter 0 for multiplication, 1 for addition: 0
 Enter x: 10
 Enter y: 3
@@ -407,7 +407,7 @@ ceylon run: Assertion failed
   unviolated is Float y
   violated option == multiplication || option == addition
   ...
-```
+{% endhighlight %}
 
 The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
 
