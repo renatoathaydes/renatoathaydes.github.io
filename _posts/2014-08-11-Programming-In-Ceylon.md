@@ -1,16 +1,73 @@
 ---
 layout: post
-title: Programming in Ceylon - for beginners
+title: Learn Programming in Ceylon - for beginners
 ---
 
-Ceylon is a programming language that was designed from scratch to work in at least 2 different platforms:
 
-* JVM (Java Virtual Machine) - the Java runtime
-* JavaScript engines - which includes Internet browsers
+## Introduction
 
-This is really cool because it means you can write code that runs wherever you need it to without changes!
+Programming is one of the most rewarding activities there is. Once you master, you will be able to create all sorts of
+things. Every single app, or program, you ever used on a computer was created mostly by computer programmers.
 
-To get started with Ceylon, the easiest way is to use the [Ceylon IDE](http://ceylon-lang.org/documentation/1.0/ide/install/) (Integrated Development Environment, or in plain English, the software you use to easily write  and run Ceylon programs, which lots of nice features like auto-completion - it suggests to you what kinds of things you can do while you write something -, syntax highlighting and many other things).
+Every game you've ever played, every animation you've watched on the Internet, every website you've visited, required
+someone (or many people) to write computer instructions that specify in minute detail how everything should look, behave,
+change, react. It may look like an incredibly daunting task! But also one of the most fun tasks you can imagine!
+
+These days, very few people work on the processor-instructions level, which is done in a kind of language called [Assembly]
+(http://en.wikipedia.org/wiki/Assembly_language).
+
+That's because to achieve anything much useful in Assembly would require enormous amounts of effort. Assembly was designed
+to map directly to machine instructions. Basically, it is a machine-friendly language, not a human-friendly one.
+
+Luckily, people have created many higher level languages overtime that made it easier for humans to write code that can
+later be translated to Assembly by other programs, and then executed by computers. Programs that do the translation are called
+**compilers** or **interpreters**.
+
+One of the first such higher level languages was [Fortran](http://en.wikipedia.org/wiki/Fortran), created in the early 1950's.
+Many other languages followed, a few noticeable examples being LISP (1958), COBOL (1959), C (1969) and Prolog (1972).
+
+In recent years, there has been an explosion on the number of programming languages freely available to anyone willing to
+learn them, some of which even "compile" to other languages! The number is almost certainly in the thousands, though it is
+hard to know how many languages are actually used by more than just a few people.
+
+The big, dominant languages, are currently just a few: Java, C++, C#, Python, JavaScript, besides LISP (under many varieties)
+are probably the main ones.
+
+Newer languages incorporate lessons learned in previous generations of languages to make programming easier and more efficient.
+And a lot of lessons have been learned in the half-century people have been using higher level languages.
+
+The newest generation of languages, which includes beautiful languages such as Haskell and D, are still coming up with innovations
+to attempt to improve on their predecessors and find the perfect balance between simplicity and expressivity, speed and
+conciseness.
+
+To get the balance right is very difficult. But out of the newest wave of languages, one stands out for having an incredibly
+powerful and disciplined, yet simple and accessible philosophy: the [Ceylon programming language](http://ceylon-lang.org/).
+
+## What is Ceylon
+
+Ceylon is a direct [descendant of Java](http://ceylon-lang.org/documentation/1.0/faq/#what_is_ceylon),
+which is a language that has been battle-tested in all sorts of conditions (in small and very large applications) and despite
+its shortcomings, proven to be a great tool for developing almost any sort of application. Ceylon improves on Java but also
+takes lessons from many other languages, packaging everything into a highly concise unit which really makes programming a
+pleasurable experience.
+
+Amongst the [main goals](http://ceylon-lang.org/blog/2012/01/10/goals/) of Ceylon are to achieve high readability and
+predictability. These are extremely important in programming. When you read some code, you should be able to immediately
+know what it is trying to achieve, even if you are not familiar with all the details of the software.
+
+Ceylon was designed from scratch to work in at least 2 different platforms:
+
+* JVM (Java Virtual Machine) - the Java runtime.
+* JavaScript engines - which includes almost every Internet browser.
+
+This is really cool because it means you can write code that runs wherever you need it to run without changes!
+
+## Getting started with Ceylon
+
+To get started with Ceylon, the easiest way is to use the [Ceylon IDE](http://ceylon-lang.org/documentation/1.0/ide/install/)
+(Integrated Development Environment, or in plain English, the software you use to easily write  and run Ceylon programs,
+which lots of nice features like auto-completion - it suggests to you what kinds of things you can do while you write something -,
+syntax highlighting and many other things).
 
 ## Installing the Ceylon IDE
 
@@ -112,7 +169,8 @@ Ceylon allows you to include `value`s, in a String. But to do that, we must firs
 Plain text like `"Hello World!"` is referred to as a `String` in the programming world (not only in Ceylon).
 There are many other **types**, as these things are called, that you can use. For example:
 
-* `Integer`: integers such as `-2, -1, 0, 1, 2, 3 ...`
+* `Integer`: integers such as `-2, -1, 0, 1, 2, 3 ...`. Hexa-decimal numbers can also be represented: `#FF05DA`,
+which is `16713178` in decimal.
 * `Float`: floating-point numbers like `-2.0, -1.9, ..., 12_345.678 ...`
 * `Boolean`: either the value `true` or `false`, one of the most useful types in any program!
 * `Char`: characters (Unicode) like ` 'a', 'b', 'A', 'z', '\{#03C0}' ` (the last of which is the beloved constant `pi`!)
@@ -219,7 +277,7 @@ Actually you could have used many other mathematical operators: `+` (plus), `-` 
 print(((2.5 * 3.0) ^ 2) + ((10_000 / 7)  % 37));
 {% endhighlight %}
 
-## Using functions and the 'if' statement
+## Functions and the 'if' statement
 
 In the previous section, we made use of another Ceylon function, `parseFloat`, to turn the `String` the user entered with
  the keyboard into a `Float` (ie. a floating-point number) so that we can actually multiply the numbers.
@@ -266,57 +324,103 @@ if (4 == 4) {
 }
 {% endhighlight %}
 
-## Creating and calling your own functions
+One thing to notice is that functions can be values as well. As such, we can pass functions as arguments to other functions.
 
-We have now used a few Ceylon built-in functions: `print` and `parseFloat`, for example. We can also define our own functions
-and call them just like we call those functions.
-
-This is very useful to make our code more understandable. It is considered good practice to keep each function you write
-(including the `run` function) at most a dozen or so lines long.
-
-As an example, we could take the previous example and, instead of doing everything in one single function, break it apart
-into a few functions, as shown below:
+Check this out!
 
 {% highlight ceylon %}
-shared void run() {
-	value x = askUserForNumber("Enter a number (x): ");
-	value y = askUserForNumber("Enter a number (y): ");
-
-    printMultiplicationResult(x, y);
-}
-
 Float? askUserForNumber(String question) {
 	process.write(question);
 	value userX = process.readLine();
 	return parseFloat(userX);
 }
 
-void printMultiplicationResult(Float? x, Float? y) {
-	if (exists x, exists y) {
-		print("``x`` * ``y`` = ``x * y``");
-	} else {
-		print("You must enter numbers!");
+shared void run() {
+	function multiply(Float a, Float b) => a * b;
+	function add(Float a, Float b) => a + b;
+	
+	void printResult(Float(Float, Float) operation, Float x, Float y) {
+		print("Result: ``operation(x, y)``");
 	}
+	
+	value multiplication = 0;
+	value addition = 1;
+	value option = askUserForNumber("Enter ``multiplication`` for multiplication, ``addition`` for addition: ");
+	value x = askUserForNumber("Enter x: ");
+	value y = askUserForNumber("Enter y: ");
+	
+	assert(is Float option, is Float x, is Float y,
+	       option == multiplication || option == addition);
+	
+	value operation = option == multiplication then multiply else add;
+	printResult(operation, x, y);
 }
 {% endhighlight %}
 
-This program may be a little longer than our original one, but writing code like this has several benefits:
+First, we define a simple function that just asks the user for a number. As it is a top-level function (ie. not nested
+inside another function), we must declare its return type (which is the same as `parseFloat`'s return type).
 
-* every function you write can be re-used in many places (make it `shared` if you want to maximize re-usability).
+Now, inside the `run` function, we defined two new functions, ``multiply` and `add`, using the short notation for functions
+with the fat arrow `=>`.
+This kind of function can only contain one expression. This is a very common style in Ceylon because usually functions
+are broken up into many smaller functions until they become a simple expression. The long notation for functions is to
+use `{ ... }` to wrap all statements the function should execute (like we did for the `askUserForNumber` and `run` functions).
+
+We then defined a function called `printResult` which takes another function, called `operation`, with a type
+`Float(Float, Float)`. You might have guessed that this type corresponds to any function that takes two `Float`s as arguments
+and returns another `Float`. Not coincidentally, both `add` and `multiply` are examples of just such functions.
+
+A function that returns a `String` and takes only one `Float` would look like this: `String(Float)`.
+
+The program asks the user to enter either `0` for multiplication or `1` for addition, then asks for the values of `x` and `y`.
+
+In the next step, it `assert`s that the user entered valid values!
+
+`assert` can be used for 2 reasons:
+
+* to verify a condition is true and in case it's not, throw an Error. When an Error is thrown, the program does not continue
+execution (but there is a mechanism called `try`/`catch` which allows us to handle Errors such as this).
+* to narrow the type of a value in conjunction with the `is` operator. After line `assert(is Float x);`, it is guaranteed
+that `x` is a `Float`.
+
+Finally, we call `printResult` using the appropriate operation.
+
+Below are some sample runs of the above program:
+
+```
+Enter 0 for multiplication, 1 for addition: 0
+Enter x: 10
+Enter y: 3
+Result: 30.0
+
+Enter 0 for multiplication, 1 for addition: 1
+Enter x: 4
+Enter y: 7
+Result: 11.0
+
+Enter 0 for multiplication, 1 for addition: 2
+Enter x: 10
+Enter y: 5
+ceylon run: Assertion failed
+  unviolated is Float option
+  unviolated is Float x
+  unviolated is Float y
+  violated option == multiplication || option == addition
+  ...
+```
+
+The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
+
+It is considered good practice to keep each function you write (including the `run` function) at most a dozen or so lines long.
+
+The resulting program may be a little longer than otherwise in the end, but writing code like this has several benefits:
+
+* every function you write can be re-used in many places (make it `shared` if you want to maximize re-usability - at the cost
+  of flexibility, as it gets harder and harder to change functions once they are used in more and more places).
 * you only need to keep a small amount of information in your head when you are trying to understand what the code does
   because each function is small.
 * each functionality is isolated from others and explicitly declares what is relevant information (its arguments) for it
   to do its job, and what is gives back (the return type).
-
-Let's analyse the above program.
-
-We start with the `run` function. What does it do? Have a look at it...
-
-Well, it asks the user for a number `x`, then it asks the user for a number `y`, then it prints the result of the multiplication.
-
-Notice how describing it in English reads almost exactly as just reading the code itself. That's how you know you wrote good
-code! You only need to look at the implementation of `askUserForNumber` if that's the part of the program you are currently
-interested in.
 
 If the name of the function is not enough for us to understand what it does, well, it probably has a bad name in the first place...
 but we should also look at the type signature of the function, which is basically the types of the arguments (what we pass in)
@@ -337,7 +441,7 @@ We can see that we must provide a `String` with a question (likely a question to
 or return values of different types. That's why union types exist.
 
 `Float?` is synonym with `Float | Null`, which reads as *float or null*. This means that a value of this type must either
-be a `Float` or a `null`.
+be a `Float` like `3.1415` or a `null`.
 
 This makes sense, because when we ask the user to enter a number, we cannot be sure that the user is always going to give us
 something that is a valid number.
@@ -350,8 +454,32 @@ print(x exists then "Thank you!" else "Sorry, that's not a number.");
 {% endhighlight %}
 
 > We show above how you can use `then` ... `else` directly in a single expression... you just need something that evaluates
-to a Boolean before `then`, and something that evaluates to some value whether that's true or not.
+to a Boolean before `then`, and an expression that evaluates to some value in case that's true and another in case that's not.
 
+Any number of types can be part of an union. As an example:
+
+{% highlight ceylon %}
+// we must import the 'type' function to find the type of a value
+import ceylon.language.meta { type }
+
+shared void run() {
+	void show(String|Boolean|Integer input) {
+		print("``input`` is of type ``type(input)``");
+	}
+	show("hello");
+	show(true);
+	show(400);
+}
+{% endhighlight %}
+
+This is example is really artificial, but serves to demonstrate a few new concepts:
+
+* the first line is a comment (ie. it is not treated as code) because it starts with `//`. Comments can also be wrapped
+between `/*` and `*/` to span several lines.
+* only a few functions and objects are available to Ceylon code without having to be explicitly imported. Most functions
+from the Ceylon SDK (Software Development Kit) need to be explicitly imported, as shown above for the `type` function.
+* You can define functions inside other functions.
+* Union types can be formed by many different types.
 
 
 
