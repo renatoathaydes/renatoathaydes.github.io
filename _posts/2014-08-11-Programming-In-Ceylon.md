@@ -422,6 +422,7 @@ ceylon run: Assertion failed
   unviolated is Float y
 
   violated option == multiplication || option == addition
+  
 </code>
 
 The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
