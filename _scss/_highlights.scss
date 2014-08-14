@@ -10,9 +10,7 @@
 }
 
 .highlight pre {
-  /* overflow: scroll; Prefer no word wrap? Uncomment this line and comment out the 2 lines below. */
-  word-break: break-all;
-  word-wrap: break-word;
+  overflow: scroll;
 }
 
 code {
@@ -36,11 +34,11 @@ p > code {
 /* Generic */
 .highlight .g { color: #93A1A1 }
 /* Keyword */
-.highlight .k { color: #859900 }
+.highlight .k { color: #dc322f }
 /* Literal */
 .highlight .l { color: #93A1A1 }
 /* Name */
-.highlight .n { color: #93A1A1 }
+.highlight .n { color: #E8E8E8 }
 /* Operator */
 .highlight .o { color: #859900 }
 /* Other */
