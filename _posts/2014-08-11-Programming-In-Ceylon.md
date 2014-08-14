@@ -387,44 +387,24 @@ Finally, we call `printResult` using the appropriate operation.
 
 Below are some sample runs of the above program:
 
-<code>
-
-Enter 0 for multiplication, 1 for addition: 0
-
-Enter x: 10
-
-Enter y: 3
-
-Result: 30.0
-
-
-Enter 0 for multiplication, 1 for addition: 1
-
-Enter x: 4
-
-Enter y: 7
-
-Result: 11.0
-
-
-Enter 0 for multiplication, 1 for addition: 2
-
-Enter x: 10
-
-Enter y: 5
-
-ceylon run: Assertion failed
-
-  unviolated is Float option
-
-  unviolated is Float x
-
-  unviolated is Float y
-
-  violated option == multiplication || option == addition
+> Enter 0 for multiplication, 1 for addition: 0<br/>
+  Enter x: 10<br/>
+  Enter y: 3<br/>
+  Result: 30.0<br/>
+  Enter 0 for multiplication, 1 for addition: 1<br/>
+  Enter x: 4<br/>
+  Enter y: 7<br/>
+  Result: 11.0<br/>
+  Enter 0 for multiplication, 1 for addition: 2<br/>
+  Enter x: 10<br/>
+  Enter y: 5<br/>
+  ceylon run: Assertion failed<br/>
+    unviolated is Float option<br/>
+    unviolated is Float x<br/>
+    unviolated is Float y<br/>
+    violated option == multiplication || option == addition<br/>
   
-</code>
-
+  
 The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
 
 It is considered good practice to keep each function you write (including the `run` function) at most a dozen or so lines long.
