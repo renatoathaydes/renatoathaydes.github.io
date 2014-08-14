@@ -399,10 +399,10 @@ Below are some sample runs of the above program:
   Enter x: 10<br/>
   Enter y: 5<br/>
   <span style="font-color: red;">ceylon run: Assertion failed</span><br/>
-    unviolated is Float option<br/>
-    unviolated is Float x<br/>
-    unviolated is Float y<br/>
-    violated option == multiplication || option == addition<br/>
+  <span style="font-color: red;">&nbsp;&nbsp;unviolated is Float option</span><br/>
+  <span style="font-color: red;">&nbsp;&nbsp;unviolated is Float x</span><br/>
+  <span style="font-color: red;">&nbsp;&nbsp;unviolated is Float y</span><br/>
+  <span style="font-color: red;">&nbsp;&nbsp;violated option == multiplication || option == addition</span><br/>
   
 The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
 
