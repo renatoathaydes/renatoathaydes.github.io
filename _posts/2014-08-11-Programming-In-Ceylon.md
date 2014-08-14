@@ -398,12 +398,13 @@ Below are some sample runs of the above program:
   Enter 0 for multiplication, 1 for addition: 2<br/>
   Enter x: 10<br/>
   Enter y: 5<br/>
-  ceylon run: Assertion failed<br/>
+  <div style="font-color: red;">
+    ceylon run: Assertion failed<br/>
     unviolated is Float option<br/>
     unviolated is Float x<br/>
     unviolated is Float y<br/>
     violated option == multiplication || option == addition<br/>
-  
+  </div>
   
 The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
 
