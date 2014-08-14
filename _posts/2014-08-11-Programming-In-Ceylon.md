@@ -387,27 +387,42 @@ Finally, we call `printResult` using the appropriate operation.
 
 Below are some sample runs of the above program:
 
-{% highlight javascript %}
+<code>
+
 Enter 0 for multiplication, 1 for addition: 0
+
 Enter x: 10
+
 Enter y: 3
+
 Result: 30.0
 
+
 Enter 0 for multiplication, 1 for addition: 1
+
 Enter x: 4
+
 Enter y: 7
+
 Result: 11.0
 
+
 Enter 0 for multiplication, 1 for addition: 2
+
 Enter x: 10
+
 Enter y: 5
+
 ceylon run: Assertion failed
+
   unviolated is Float option
+
   unviolated is Float x
+
   unviolated is Float y
+
   violated option == multiplication || option == addition
-  ...
-{% endhighlight %}
+</code>
 
 The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
 
