@@ -115,11 +115,11 @@ Click on `File`, select `New` and then `Ceylon Module`. Enter a module name, suc
 
 You should now have a project with the following contents:
 
-<code>source/</code>
-<code>&nbsp;&nbsp;|--helloCeylon/</code>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon</code>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon</code>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon</code>
+<code>source/</code><br/>
+<code>&nbsp;&nbsp;|--helloCeylon/</code><br/>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon</code><br/>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon</code><br/>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon</code><br/>
 
 The module descriptor can be used to document the module's functionality, its version, and to import other modules.
 
