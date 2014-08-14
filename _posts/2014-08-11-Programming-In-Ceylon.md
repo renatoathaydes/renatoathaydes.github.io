@@ -13,8 +13,8 @@ Every game you've ever played, every animation you've watched on the Internet, e
 someone (or many people) to write computer instructions that specify in minute detail how everything should look, behave,
 change, react. It may look like an incredibly daunting task! But also one of the most fun tasks you can imagine!
 
-These days, very few people work on the processor-instructions level, which is done in a kind of language called [Assembly]
-(http://en.wikipedia.org/wiki/Assembly_language).
+These days, very few people work on the processor-instructions level, which is done in a kind of language called
+ [Assembly](http://en.wikipedia.org/wiki/Assembly_language).
 
 That's because to achieve anything much useful in Assembly would require enormous amounts of effort. Assembly was designed
 to map directly to machine instructions. Basically, it is a machine-friendly language, not a human-friendly one.
@@ -31,7 +31,7 @@ learn them, some of which even "compile" to other languages! The number is almos
 hard to know how many languages are actually used by more than just a few people.
 
 The big, dominant languages, on the other hand, are currently just a few: Java, C++, C#, Python, JavaScript, besides LISP
-(under many varieties) are probably the main ones.
+(under a few varieties) are probably the main ones.
 
 Newer languages incorporate lessons learned in previous generations of languages to make programming easier and more efficient.
 And a lot of lessons have been learned in the half-century people have been using higher level languages.
@@ -48,12 +48,14 @@ powerful and disciplined, yet simple and accessible character: the [Ceylon progr
 Ceylon is a direct [descendant of Java](http://ceylon-lang.org/documentation/1.0/faq/#what_is_ceylon),
 which is a language that has been battle-tested in all sorts of conditions (in small and very large applications) and despite
 its shortcomings, proven to be a great tool for developing almost any sort of application. Ceylon improves on Java's foundations
-but also takes lessons from many other languages, packaging everything into a highly concise unit which really makes programming a
-pleasurable experience.
+by keeping what's good, removing what's not so good, and adding some nice new concepts and lessons learned from many other
+languages, packaging everything into a highly concise unit which really makes programming a pleasurable experience.
 
 Amongst the [many goals](http://ceylon-lang.org/blog/2012/01/10/goals/) of Ceylon, to achieve high readability and
-predictability are the top ones. These are extremely important in programming. When you read some code, you should be able
-to immediately know what it is trying to achieve, even if you are not familiar with all the details of the software.
+predictability are clearly the top ones. These are extremely important things in programming. When you read some code,
+you should be able to immediately know what it is trying to achieve, even if you are not familiar with all the details of the software.
+With Ceylon, that can be closer to reality than with just about any other language (but programmer's diligence still accounts for most
+of the quality of the software, in Ceylon and in any other language).
 
 Ceylon was designed from scratch to work in at least 2 different platforms:
 
@@ -111,7 +113,41 @@ Click on `File`, select `New` and then `Ceylon Module`. Enter a module name, suc
  Also notice that every Ceylon module has a version! This is an awesome feature that Ceylon, unlike most languages,
  has built into the language itself and which makes Ceylon code highly modular, but that's a little bit of an advanced topic for now!
 
-You should now have a source file called `run.ceylon` with the following contents:
+You should now have a project with the following contents:
+
+<code>source/</code>
+<code>&nbsp;&nbsp;|--helloCeylon/</code>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon</code>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon</code>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon</code>
+
+The module descriptor can be used to document the module's functionality, its version, and to import other modules.
+
+*module.ceylon*
+{% highlight ceylon %}
+"This is our first Ceylon module!"
+module helloCeylon "1.0.0" {
+    // import other modules here
+}
+{% endhighlight %}
+
+The package file is used to document the package and to make it `shared`, if desired. If the package is `shared`, all
+elements defined in this package that are also shared will be visible in other modules that import this module.
+
+*package.ceylon*
+{% highlight ceylon %}
+"Package for our initial program."
+shared package helloCeylon;
+{% endhighlight %}
+
+*module.ceylon*
+{% highlight ceylon %}
+"This module is going to be awesome!"
+module helloCeylon "1.0.0" {}
+{% endhighlight %}
+
+
+You should also have a source file called `run.ceylon` with the following contents:
 
 {% highlight ceylon %}
 "Run the module `helloCeylon`."
@@ -120,18 +156,19 @@ shared void run() {
 }
 {% endhighlight %}
 
+This is where we are going to write our programs.
 The name of the file does not matter much, as long as it has the `.ceylon` extension.
 The function name, which for the above code is `run`, also does not matter, but it's a Ceylon
 convention to call the main function, ie. the function that starts your program, `run`.
 
 A few words have now been introduced and deserve an explanation! First of all, a `function` is
 just a piece of code which can be executed by either other functions or by the Ceylon runtime.
-`function`s will be one of the most important blocks from which you create whole applications
+`function`s are one of the most important blocks from which you will create whole applications
 (but not the only one, we will learn about many others later, such as `class`, `interface` etc).
 
 As already mentioned, `run` is the name of the function... `shared` just means that this function
-should be "visible" to functions that are located in different locations (`package`s as we will see later),
-and `void` means that the function does not return anything. Other functions might return things, like a
+should be "visible" to functions that are located in different locations (`package`s and `module`s, as we will see later),
+and `void` means that the function does not return anything back to the caller. Other functions might return things, like a
 `Number`, but let's keep it simple at first!
 
 We can make Ceylon write something out (`print` in programmer's jargon) by changing the contents of `run.ceylon` to this:
@@ -170,8 +207,8 @@ Plain text like `"Hello World!"` is referred to as a `String` in the programming
 There are many other **types**, as these things are called, that you can use. For example:
 
 * `Integer`: integers such as `-2, -1, 0, 1, 2, 3 ...`. Hexa-decimal numbers can also be represented: `#FF05DA`,
-which is `16713178` in decimal.
-* `Float`: floating-point numbers like `-2.0, -1.9, ..., 12_345.678 ...`
+which is `16713178` in decimal, and metric symbols can be used: `10K == 10_000`, `2M == 2_000_000`
+* `Float`: floating-point numbers like `-2.0, -1.95, ..., 2.0, 12_345.678 ...`, `1m == 0.001`, `34u == 0.000_034`
 * `Boolean`: either the value `true` or `false`, one of the most useful types in any program!
 * `Char`: characters (Unicode) like ` 'a', 'b', 'A', 'z', '\{#03C0}' ` (the last of which is the beloved constant `pi`!)
 * `Null`: a type with only one possible value, `null` (meaning the absence of any value, something that comes in handy quite often)
@@ -387,22 +424,22 @@ Finally, we call `printResult` using the appropriate operation.
 
 Below are some sample runs of the above program:
 
-> Enter 0 for multiplication, 1 for addition: 0<br/>
-  Enter x: 10<br/>
-  Enter y: 3<br/>
-  Result: 30.0<br/>
-  Enter 0 for multiplication, 1 for addition: 1<br/>
-  Enter x: 4<br/>
-  Enter y: 7<br/>
-  Result: 11.0<br/>
-  Enter 0 for multiplication, 1 for addition: 2<br/>
-  Enter x: 10<br/>
-  Enter y: 5<br/>
-  <span style="font-color: red;">ceylon run: Assertion failed</span><br/>
-  <span style="font-color: red;">&nbsp;&nbsp;unviolated is Float option</span><br/>
-  <span style="font-color: red;">&nbsp;&nbsp;unviolated is Float x</span><br/>
-  <span style="font-color: red;">&nbsp;&nbsp;unviolated is Float y</span><br/>
-  <span style="font-color: red;">&nbsp;&nbsp;violated option == multiplication || option == addition</span><br/>
+> Enter 0 for multiplication, 1 for addition: <span style="color: blue;">0</span><br/>
+  Enter x: <span style="color: blue;">10</span><br/>
+  Enter y: <span style="color: blue;">3</span><br/>
+  **Result: 30.0**<br/>
+  Enter 0 for multiplication, 1 for addition: <span style="color: blue;">1</span><br/>
+  Enter x: <span style="color: blue;">4</span><br/>
+  Enter y: <span style="color: blue;">7</span><br/>
+  **Result: 11.0**<br/>
+  Enter 0 for multiplication, 1 for addition: <span style="color: blue;">2</span><br/>
+  Enter x: <span style="color: blue;">10</span><br/>
+  Enter y: <span style="color: blue;">5</span><br/>
+  <span style="color: red;">ceylon run: Assertion failed</span><br/>
+  <span style="color: red;">&nbsp;&nbsp;unviolated is Float option</span><br/>
+  <span style="color: red;">&nbsp;&nbsp;unviolated is Float x</span><br/>
+  <span style="color: red;">&nbsp;&nbsp;unviolated is Float y</span><br/>
+  <span style="color: red;">&nbsp;&nbsp;violated option == multiplication || option == addition</span><br/>
   
 The error message in the last run states that the option assertion was violated because option was not multiplication nor addition.
 
@@ -420,6 +457,62 @@ The resulting program may be a little longer than otherwise in the end, but writ
 If the name of the function is not enough for us to understand what it does, well, it probably has a bad name in the first place...
 but we should also look at the type signature of the function, which is basically the types of the arguments (what we pass in)
 and the type of the return value (what we get out). This is valuable information!
+
+## while and for
+
+Most of the time, people want their software to stay "on" until they are done with it. So far, however, every time we want
+to use our little program, we must start it up again because after we use it once and get an answer, our program just stops.
+
+To solve this problem, we can use a loop so that after the program is used by the user once, it goes back to the beginning
+ready to be used again. We can achieve that easily with the `while` statement:
+
+{% highlight ceylon %}
+while(true) {
+    // ask user for input and print result
+}
+{% endhighlight %}
+
+Now our program will "never" end. Using the previous example, it will ask the user for an operation, x, and y, print the
+result, then start again and ask the user for an operation, x, and y, and so on:
+
+{% highlight ceylon %}
+while(true) {
+	value option = askUserForNumber("Enter ``multiplication`` for multiplication, ``addition`` for addition: ");
+	value x = askUserForNumber("Enter x: ");
+	value y = askUserForNumber("Enter y: ");
+		
+	assert(is Float option, is Float x, is Float y,
+	option == multiplication || option == addition);
+		
+	value operation = option == multiplication then multiply else add;
+	printResult(operation, x, y);	
+}
+{% endhighlight %}
+
+If we enter any invalid input, our program will actually exit because when an error happens, the loop is broken.
+
+But it would be nicer to have some way to stop the program without an error. We could use `break` to break off the loop
+in case the user chose a new option - the `exit` option:
+
+{% highlight ceylon %}
+value multiplication = 0;
+value addition = 1;
+value exit = 2;
+	
+while(true) {
+	value option = askUserForNumber("Enter: * ``multiplication`` for multiplication,
+	                                        * ``addition`` for addition
+	                                        * ``exit`` to exit: ");
+	if (exists option, option == exit) {
+		break;
+	}
+    // the rest remains the same
+    ...
+}
+{% endhighlight %}
+
+Although the previous example shows how `while` can be used to create an *infinite* loop, it is far more common to loop
+only while some condition is true.
 
 ## Union types
 
@@ -476,6 +569,131 @@ from the Ceylon SDK (Software Development Kit) need to be explicitly imported, a
 * You can define functions inside other functions.
 * Union types can be formed by many different types.
 
+Once we learn to define our own types, union types will become much more interesting. That's the topic of the next section!
+
+
+## Defining our own types
+
+All types we have talked about so far (`String`, `Boolean`, `Float`, `Integer`, `Character`) are defined by Ceylon itself
+and available to any Ceylon programs. We can achieve a lot using only these types, but to model the real world, it is very
+convenient to be able to define our own types so that it becomes more natural to reason about our the problems we are trying
+to solve.
+
+Let's imagine we are trying to write a program to store information about cities of the world. We know that every city has
+a name. Every city has a population. Every city is located in some country. And so on. Let's pretend we only care about these
+features of cities. How can we model this in our programs?
+
+One way would be to define a type for `City`. In Ceylon, we can define a type with a `class`:
+
+{% highlight ceylon %}
+class City(shared String name,
+           shared Integer population,
+           shared String country) {}
+
+// let's create a City
+value newYork = City("New York", 8_405_837, "USA");
+
+// we can make it clearer what each value means by using the named-argument syntax
+value berlin = City {
+    name = "Berlin";
+    population = 4_000_000;
+    country = "Germany";
+};
+
+assert(newYork.population > 8M);
+assert(berling.country == "Germany");
+{% endhighlight %}
+
+## Polymorphism - extending existing types
+
+Imagine that we have class `City` as defined above, but that now we decide that for certain important cities, we want to
+store much more information. Things like "most visited touristic places", "gastronomic districts", "tallest buildings"...
+things that just don't make sense for most cities except mega cities. Well, why not call our type `MegaCity`!? We can `extend`
+our existing type to allow that to exist in our program:
+
+{% highlight ceylon %}
+
+{% endhighlight %}
+
+
+## Using aliases
+
+Sometimes, we want to declare a type which is very simple, or similar to another existing type, but we still believe it is
+useful to make that type to make code easier to understand.
+
+For example, in the above example, country is represented as just a `String`. That might make sense if we do not really care
+about countries to solve our problem. But we might still want to create a type for `Country` for clarity. We can create an
+`alias` as shown below:
+
+{% highlight ceylon %}
+alias Country => String;
+
+// and now we can update the definition of City
+class City(shared String name,
+           shared Integer population,
+           shared Country country) {}
+{% endhighlight %}
+
+Aliases do not create new types, they simply 'rename' an existing type.
+
+However, sometimes we may face situations where we need a union of several types. In these occasions, alias can be a life-saver!
+
+Imagine we want to model a game of cards to create a game. A simple way would be like this:
+
+{% highlight ceylon %}
+// suites
+class Spades() {}
+class Diamonds() {}
+class Hearts() {}
+class Clubs() {}
+
+// ranks
+class Ace() {}
+class Jack() {}
+class Queen() {}
+class King() {}
+
+// definition of a playing card
+class Card(shared Integer|Ace|Jack|Queen|King rank,
+	       shared Spades|Diamonds|Hearts|Clubs suit) {}
+
+// example of a card
+Card aceOfSpades = Card(Ace(), Spades());
+{% endhighlight %}
+
+We could make the definition of `Card` much nicer by using aliases:
+
+{% highlight ceylon %}
+
+alias Suit => Spades|Diamonds|Hearts|Club;
+alias Rank => Integer|Ace|Jack|Queen|King;
+
+// definition of a playing card
+class Card(shared Rank rank,
+	       shared Suit suit) {}
+
+// cards can still be created in the exact same way
+Card aceOfSpades = Card(Ace(), Spades());
+Card twoOfHearts = Card(2, Hearts());
+Card queenOfClubs = Card(Queen(), Clubs());
+{% endhighlight %}
+
+## Enumerated types
+
+In the previous example, `alias` was a really nice way to solve the problem. But it may not work in some occasions where
+the types we want to alias are not so simple.
+
+As an example, let's suppose that in our game, we need to be able show some information about the cards to help beginners.
+
+This wouldn't work so well with the code shown above. If we try to print a card, say `aceOfSpades`, this is what we would get:
+
+<code>helloCeylon.Card@2111fce</code>
+
+Not nice! This is the default implementation of the `string` property of every user-defined type 
+
+{% highlight ceylon %}
+
+{% endhighlight %}
 
 
 For more of the basics, have a look at the [Ceylon basics](http://ceylon-lang.org/documentation/1.0/tour/basics/) in the Tour of Ceylon.
