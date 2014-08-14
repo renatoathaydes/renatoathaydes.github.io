@@ -140,15 +140,9 @@ elements defined in this package that are also shared will be visible in other m
 shared package helloCeylon;
 {% endhighlight %}
 
-*module.ceylon*
-{% highlight ceylon %}
-"This module is going to be awesome!"
-module helloCeylon "1.0.0" {}
-{% endhighlight %}
-
-
 You should also have a source file called `run.ceylon` with the following contents:
 
+*run.ceylon*
 {% highlight ceylon %}
 "Run the module `helloCeylon`."
 shared void run() {
