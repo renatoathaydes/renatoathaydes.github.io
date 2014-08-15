@@ -60,11 +60,9 @@ of the quality of the software, in Ceylon and in any other language).
 Ceylon was designed from scratch to work in at least 2 different platforms:
 
 * JVM (Java Virtual Machine) - the Java runtime.
-* JavaScript engines - which includes almost every Internet browser.
+* JavaScript engines - which includes basically every Internet browser and [node.js](http://nodejs.org/).
 
 This is really cool because it means you can write code that runs wherever you need it to run without changes!
-
-## Getting started with Ceylon
 
 To get started with Ceylon, the easiest way is to use the [Ceylon IDE](http://ceylon-lang.org/documentation/1.0/ide/install/)
 (Integrated Development Environment, or in plain English, the software you use to easily write  and run Ceylon programs,
@@ -102,9 +100,9 @@ If everything went ok, you should now see a nice elephant (the Ceylon mascot) ne
 
 And that's it! We're ready to start coding in Ceylon!
 
-## Getting started with Ceylon
+## Creating a Ceylon module
 
-To get started with Ceylon, we must create a module, which is the top-level unit of distribution of any Ceylon library or application.
+To create a program using Ceylon, we must create a module, which is the top-level unit of any Ceylon library or application.
 
 Click on `File`, select `New` and then `Ceylon Module`. Enter a module name, such as `helloCeylon`, and click on `Finish`.
 
@@ -117,9 +115,9 @@ You should now have a project with the following contents:
 
 <code>source/</code><br/>
 <code>&nbsp;&nbsp;|--helloCeylon/</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon</code><br/>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon</code><br/>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon</code><br/>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon</code><br/>
 
 The module descriptor can be used to document the module's functionality, its version, and to import other modules.
 
@@ -131,8 +129,19 @@ module helloCeylon "1.0.0" {
 }
 {% endhighlight %}
 
-The package file is used to document the package and to make it `shared`, if desired. If the package is `shared`, all
-elements defined in this package that are also shared will be visible in other modules that import this module.
+
+A module can have one or more packages. Each package can contain several elements such as functions, classes, objects
+and interfaces (we will look at each one of them in detail later on).
+
+Packages are directories under (and including) the module directory and must have the same name as the directory.
+In this example, our first package is called `helloCeylon`. If we create a directory under it called `myPackage`,
+this directory will be the `helloCeylon.myPackage` package.
+
+Each package may contain a package descriptor called `package.ceylon`. This file is used to document the package and to
+make it `shared`, if desired.
+
+If the package is `shared`, all elements defined in this package that are also `shared` will be visible in other modules
+that import this module.
 
 *package.ceylon*
 {% highlight ceylon %}
@@ -140,7 +149,7 @@ elements defined in this package that are also shared will be visible in other m
 shared package helloCeylon;
 {% endhighlight %}
 
-You should also have a source file called `run.ceylon` with the following contents:
+Finally, you should also have a source file called `run.ceylon` inside the `helloCeylon` package with the following contents:
 
 *run.ceylon*
 {% highlight ceylon %}
@@ -150,9 +159,11 @@ shared void run() {
 }
 {% endhighlight %}
 
-This is where we are going to write our programs.
-The name of the file does not matter much, as long as it has the `.ceylon` extension.
-The function name, which for the above code is `run`, also does not matter, but it's a Ceylon
+This is where we are going to write the source code, which defines the actual functionality of our programs.
+The name of the file does not matter much and you can have many source files in each package 
+(source files must have the `.ceylon` extension).
+
+The initial function's name, which for the above code is `run`, also does not matter, but it's a Ceylon
 convention to call the main function, ie. the function that starts your program, `run`.
 
 A few words have now been introduced and deserve an explanation! First of all, a `function` is
@@ -161,9 +172,12 @@ just a piece of code which can be executed by either other functions or by the C
 (but not the only one, we will learn about many others later, such as `class`, `interface` etc).
 
 As already mentioned, `run` is the name of the function... `shared` just means that this function
-should be "visible" to functions that are located in different locations (`package`s and `module`s, as we will see later),
-and `void` means that the function does not return anything back to the caller. Other functions might return things, like a
+should be "visible" to elements that are located in different packages and, possibly, modules.
+
+`void` means that the function does not return anything back to the caller. Other functions might return things, like a
 `Number`, but let's keep it simple at first!
+
+## Hello World!
 
 We can make Ceylon write something out (`print` in programmer's jargon) by changing the contents of `run.ceylon` to this:
 
@@ -175,23 +189,23 @@ shared void run() {
 {% endhighlight %}
 
 This is the famous Hello World program, which is almost always the first program you write when learning a programming language!
-As you can see, it's pretty simple in Ceylon! We invoke a another function called `print`, which Ceylon provides to us, with
-an argument `"Hello World!"`. We must use quotes so that Ceylon understands that we want it to treat as plain text, not some
-kind of function call or anything else. We need to add a `;` at the end to indicate that our statement is complete (like a `.` in
+As you can see, it's pretty simple in Ceylon! We invoke another function called `print`, which Ceylon provides to us, with
+an argument `"Hello World!"`. We must use quotes so that Ceylon understands that we want it to treat `Hello World!` as plain text, not some
+kind of function call or anything else. We need to add a `;` at the end to indicate that our statement is complete (like the `.` in
 the end of this sentence). You could write more than one statement in one line:
 
 {% highlight ceylon %}
 print("Hello"); print("Hi there"); print("I said hi!");
 {% endhighlight %}
 
-But this makes it harder to understand the code, so it is almost always better to have one statement only per line.
+But this makes it harder to understand the code, so it is almost always better to have only one statement per line.
 
 But now, let's get to the real fun and run our first program! 
 
 Click on the green play button on the top of the screen. In the bottom pane called `Console` (should be near the bottom-right
  of the screen), you should see the message we asked to be printed, `Hello World!`.
 
-You can change the text in the `String` (between quotes) to anything you like! Well, almost anything...
+You can change the text in the `String` (text between quotes) to anything you like! Well, almost anything...
 
 Ceylon allows you to include `value`s, in a String. But to do that, we must first understand what a value is.
 
@@ -201,13 +215,31 @@ Plain text like `"Hello World!"` is referred to as a `String` in the programming
 There are many other **types**, as these things are called, that you can use. For example:
 
 * `Integer`: integers such as `-2, -1, 0, 1, 2, 3 ...`. Hexa-decimal numbers can also be represented: `#FF05DA`,
-which is `16713178` in decimal, and metric symbols can be used: `10K == 10_000`, `2M == 2_000_000`
-* `Float`: floating-point numbers like `-2.0, -1.95, ..., 2.0, 12_345.678 ...`, `1m == 0.001`, `34u == 0.000_034`
+which is `16713178` in decimal, and metric symbols can be used: `10K` or `10_000`, `2M` or `2_000_000`
+* `Float`: floating-point numbers like `-2.0, -1.95, 2.0, 12_345.678`, `1m` or `0.001`, `34u` or `0.000_034`
 * `Boolean`: either the value `true` or `false`, one of the most useful types in any program!
-* `Char`: characters (Unicode) like ` 'a', 'b', 'A', 'z', '\{#03C0}' ` (the last of which is the beloved constant `pi`!)
+* `Char`: characters (Unicode) like ` 'a', 'b', 'A', 'z', '\\{#03C0}' ` (the last of which is the beloved constant `pi`!)
 * `Null`: a type with only one possible value, `null` (meaning the absence of any value, something that comes in handy quite often)
 
-We can also define our own types, but we will have to wait a little bit before we do that!
+As you can see, type names always start with a capital-letter so that it's easy to differentiate between a type and a value
+identifier, which must always start with a lower-case letter or `_`.
+
+Everything (values, objects, functions) has a type. The type of a value defines what can be done with that value. For example,
+if you have a value whose type is `Integer`, you immediately know that you can:
+
+* get its successor: `1.successor == 2`
+* get its predecessor: `10.predecessor == 9`
+* know whether it is a positive Integer: `(-3).positive == false`
+* get a `String` representation of it: `0.string == "0"`
+* use mathematical operators on it: `2 + 2 == 4`, `4 ^ 2 == 16`
+* many other things! Type a number followed by a `.` to see what else you can do with it.
+
+> You may notice that Integers and Floats contain several methods that are equivalent to mathematical operations, such as
+  `plus`, `minus`, `divided`, `remainder`, `times`... which are equivalent to `+`, '-', '/', '%', '*' respectively. That's
+  because when you write `2 + 2`, Ceylon actually interprets this as `2.plus(2)`, which you can also write if you prefer.
+  Later we will see how this allows anyone to create types that can be used with those operators.
+
+We can also define our own types, but we will have to learn a few more things before we do that!
 
 The following code illustrates how we can declare a value called `name` with contents `"John"`
 (in other words, a `String` of value `"John"`):
@@ -217,23 +249,24 @@ value name = "John";
 {% endhighlight %}
 
 This is equivalent to writing `String name = "John"`, but Ceylon already knows that `"John"` must be a String, so you
- usually don't need to tell it that (sometimes you need to so that code in other parts of your program can also know
- the type of a certain value)!
+usually don't need to tell it that (unless the value is declared at package-level, or outside any function)!
 
-`value` is a Ceylon keyword, and as such, you must not call something in your program `value`. There's quite a few reserved
+`value` is a Ceylon keyword, and as such, you must not name something in your program `value`. There's quite a few reserved
 [keywords](http://ceylon-lang.org/documentation/1.0/spec/html/lexical.html#identifiersandkeywords) in Ceylon
 (which are necessary for it to be able to interpret your programs)... for example, a few of them are `void`,
 `if`, `then`, `else`, `for`, `while` and `in`, which are instructions we will get back to shortly...
 
-Now, instead of just printing a fixed String, let's make Ceylon print a String containing our value (paste this inside
- the `run` function):
+> If you really must name something with a keyword, you can scape it with \\i, for example: `value \\ivalue = "Hi"`.
+
+Now, instead of just printing a fixed String, let's make Ceylon print a String containing our value (paste the following
+code inside the `run` function):
 
 {% highlight ceylon %}
 value name = "John";
 print("Hello ``name``!");
 {% endhighlight %}
 
-If you run this program, you should see the message `Hello John!`! That's because, by wrapping `name` between back-quotes ` `` `,
+If you run this program, you should see the message `Hello John!`! By wrapping `name` between back-quotes ``` `` ```,
 we made Ceylon interpret `name` as not plain text, but as an arbitrary Ceylon expression.
 
 You may be asking yourself: but why not just write `print("Hello John!");`? and that would actually be exactly the same thing
@@ -245,11 +278,11 @@ value name = process.readLine();
 print("Hello ``name``!");
 {% endhighlight %}
 
-> `process` is an `object` that is always available in Ceylon... to see what it can do, just type `process.` in the IDE
- and wait for the IDE to show you (hitting Ctrl+Space will bring a popup with suggestions from anywhere!).
+> `process` is an `object` that is always available in Ceylon... to see what other things it can do, just type `process.`
+  in the IDE and wait for the IDE to show you (hitting Ctrl+Space will bring a popup with suggestions from anywhere!).
 
 Now, when you run this program, you will notice it will not print anything until you actually type something into the console
- window and hit Enter. But after you do that, you should see our greeting message printed with whatever value you entered.
+window and hit Enter. But after you do that, you should see our greeting message printed with whatever value you entered.
 
 This is really awesome, isn't it?
 
@@ -257,7 +290,7 @@ This is really awesome, isn't it?
 
 How about a program that does maths for us?
 
-That's pretty simple, here's some examples:
+That's pretty simple, here are some examples:
 
 {% highlight ceylon %}
 value x = 2 + 2;
@@ -288,7 +321,9 @@ if (exists x, exists y) {
 }
 {% endhighlight %}
 
-> Most of the syntax used above will be explained in the next section
+> Most of the syntax used above will be explained in the next section. For now, it should be enough to know that when you
+  ask the user for a number, the user may enter invalid input, so you must check that `x` and `y` actually `exists` before
+  trying to use them in any operation.
 
 The `write` method of `process` prints something to the console, just like `print`, but it does not create a new line
 after printing (unlike `print`, which is really just short for `process.writeLine`).
@@ -308,10 +343,10 @@ Actually you could have used many other mathematical operators: `+` (plus), `-` 
 print(((2.5 * 3.0) ^ 2) + ((10_000 / 7)  % 37));
 {% endhighlight %}
 
-## Functions and the 'if' statement
+## The `if` statement
 
 In the previous section, we made use of another Ceylon function, `parseFloat`, to turn the `String` the user entered with
- the keyboard into a `Float` (ie. a floating-point number) so that we can actually multiply the numbers.
+the keyboard into a `Float` (ie. a floating-point number) so that we can actually multiply the numbers.
 
 But notice that after we get values for `x` and `y`, there is an interesting new construct:
 
@@ -329,7 +364,7 @@ clause and print `You must enter numbers!`.
 > You might be thinking, if the function `parseFloat` does not return a `Float` when we type something like `NOT A NUMBER!!!`
 as a value for `x`, what does it return??? The answer is the object called `null`, of which you will hear a lot later! For
 now, it's enough to say that `parseFloat` gives us either a `Float` or `null`, and because we cannot multiply something with
-`null`, we must make sure that what we have is not `null` (which is what `exists` does), which means it must be a `Float`.
+`null`, we must make sure that what we have is not `null` (which is what `exists` does), which means it can only be a `Float`.
 
 You can try using `if` with any *boolean* expression (something that evaluates to either `true` or `false`).
 
@@ -355,11 +390,17 @@ if (4 == 4) {
 }
 {% endhighlight %}
 
-One thing to notice is that functions can be values as well. As such, we can pass functions as arguments to other functions.
+## Working with `function`s
+
+We have already defined `function` as a piece of code which can be executed by either other functions or by the Ceylon
+runtime.
+But what was missing from that definition is that functions are also values, which means they can be arguments to other
+functions, for example.
 
 Check this out!
 
 {% highlight ceylon %}
+// a little helper function
 Float? askUserForNumber(String question) {
 	process.write(question);
 	value userX = process.readLine();
@@ -367,6 +408,7 @@ Float? askUserForNumber(String question) {
 }
 
 shared void run() {
+    // shorthand notation for functions
 	function multiply(Float a, Float b) => a * b;
 	function add(Float a, Float b) => a + b;
 	
@@ -379,7 +421,8 @@ shared void run() {
 	value option = askUserForNumber("Enter ``multiplication`` for multiplication, ``addition`` for addition: ");
 	value x = askUserForNumber("Enter x: ");
 	value y = askUserForNumber("Enter y: ");
-	
+
+	// assert we got valid input. If not, an error is thrown so the program can not continue!
 	assert(is Float option, is Float x, is Float y,
 	       option == multiplication || option == addition);
 	
@@ -439,7 +482,7 @@ The error message in the last run states that the option assertion was violated 
 
 It is considered good practice to keep each function you write (including the `run` function) at most a dozen or so lines long.
 
-The resulting program may be a little longer than otherwise in the end, but writing code like this has several benefits:
+The resulting program may be a little longer than it was before, but writing code like this has several benefits:
 
 * every function you write can be re-used in many places (make it `shared` if you want to maximize re-usability - at the cost
   of flexibility, as it gets harder and harder to change functions once they are used in more and more places).
@@ -452,61 +495,82 @@ If the name of the function is not enough for us to understand what it does, wel
 but we should also look at the type signature of the function, which is basically the types of the arguments (what we pass in)
 and the type of the return value (what we get out). This is valuable information!
 
-## while and for
+## Representing and using lists
 
-Most of the time, people want their software to stay "on" until they are done with it. So far, however, every time we want
-to use our little program, we must start it up again because after we use it once and get an answer, our program just stops.
+Our maths program is starting to become somewhat useful. But it's still quite limited. For example, it only takes two numbers
+as input. What if we wanted to be able to allow the user to enter any number of inputs to perform more complex operations?
 
-To solve this problem, we can use a loop so that after the program is used by the user once, it goes back to the beginning
-ready to be used again. We can achieve that easily with the `while` statement:
+We must have a way to represent a list, or sequence of values, not only single values. Enter `Tuple` and the more generic
+`Sequence`:
 
 {% highlight ceylon %}
-while(true) {
-    // ask user for input and print result
-}
+value sequence = [1,2,3];
+assert(sequence.first == 1);
+assert(sequence[0] == 1);
+assert(sequence[1] == 2);
+assert(sequence[2] == 3);
+
+// does not compile, item at index 3 does not exist!
+assert(sequence[3] == 0);
 {% endhighlight %}
 
-Now our program will "never" end. Using the previous example, it will ask the user for an operation, x, and y, print the
-result, then start again and ask the user for an operation, x, and y, and so on:
+In the above example, the type of `sequence` is `[Integer, Integer, Integer]`, which means a *Tuple of 3 Integers*.
+
+The following example shows how the element types are preserved when we take them from a Tuple:
 
 {% highlight ceylon %}
-while(true) {
-	value option = askUserForNumber("Enter ``multiplication`` for multiplication, ``addition`` for addition: ");
-	value x = askUserForNumber("Enter x: ");
-	value y = askUserForNumber("Enter y: ");
-		
-	assert(is Float option, is Float x, is Float y,
-	option == multiplication || option == addition);
-		
-	value operation = option == multiplication then multiply else add;
-	printResult(operation, x, y);	
-}
+value x = ["Hi", 1, true];
+String x0 = x[0];
+Integer x1 = x[1];
+Boolean x2 = x[2];
 {% endhighlight %}
 
-If we enter any invalid input, our program will actually exit because when an error happens, the loop is broken.
+> Tuples are extremely powerful! Read more about them in the [Tour of Ceylon](http://ceylon-lang.org/documentation/1.0/tour/sequences/).
 
-But it would be nicer to have some way to stop the program without an error. We could use `break` to break off the loop
-in case the user chose a new option - the `exit` option:
+An empty list has type `Empty`, which is synonym with `[]`, so you can write `[] emptyList = [];`.
+
+A list with one or more elements is an instance of `[Element+]`, where `Element`
+is a type-parameter, ie. it can be replaced with any actual type.
+
+For example, `[0, 1]` is an instance of `[Integer+]`. `["Hi"]` is an instance of `[String+]`.
+
+A possibly empty list is an instance of `[Element*]`, or equivalently, `Element[]`, where `Element` could be any actual type.
+
+The following examples should clarify things:
 
 {% highlight ceylon %}
-value multiplication = 0;
-value addition = 1;
-value exit = 2;
+// tuple
+[Integer, Integer, Integer] s1 = [1,2,3];
+
+[Integer+] s2 = [1, 2, 3];
+
+// the following 2 type declarations are equivalent (maybe-empty list)
+Integer[] s3 = [1, 2, 3];
+[Integer*] s4 = [1, 2, 3];
+
+// this is fine
+[Integer*] s5 = [];
 	
-while(true) {
-	value option = askUserForNumber("Enter: * ``multiplication`` for multiplication,
-	                                        * ``addition`` for addition
-	                                        * ``exit`` to exit: ");
-	if (exists option, option == exit) {
-		break;
-	}
-    // the rest remains the same
-    ...
+// this will not compile!
+[Integer+] s6 = [];
+{% endhighlight %}
+
+The operator `nonempty` may be used to narrow the type of a list from [Element*] to [Element+]:
+
+{% highlight ceylon %}
+[Integer*] sequence = [1, 2];
+if (nonempty s) {
+    // this would not compile outside the if block as sequence.first could be null
+	print("First element is ``sequence.first``");
 }
 {% endhighlight %}
 
-Although the previous example shows how `while` can be used to create an *infinite* loop, it is far more common to loop
-only while some condition is true.
+> You may see some Ceylon code that uses curly braces to represent lists, as in `{Integer+} list = {1, 2};`.
+  These are called `Iterable`, while the ones that use square-brackets are called `Sequential`.
+  They behave much the same way, except that Iterables are evaluated lazily.
+  Roughly anywhere an `Iterable` is required, you can use a `Sequential`.
+  For details, visit the [Tour of Ceylon](http://ceylon-lang.org/documentation/1.0/tour/sequences/).
+
 
 ## Union types
 
@@ -560,7 +624,6 @@ This is example is really artificial, but serves to demonstrate a few new concep
 between `/*` and `*/` to span several lines.
 * only a few functions and objects are available to Ceylon code without having to be explicitly imported. Most functions
 from the Ceylon SDK (Software Development Kit) need to be explicitly imported, as shown above for the `type` function.
-* You can define functions inside other functions.
 * Union types can be formed by many different types.
 
 Once we learn to define our own types, union types will become much more interesting. That's the topic of the next section!
@@ -595,13 +658,13 @@ value berlin = City {
 };
 
 assert(newYork.population > 8M);
-assert(berling.country == "Germany");
+assert(berlin.country == "Germany");
 {% endhighlight %}
 
 ## Polymorphism - extending existing types
 
 Imagine that we have class `City` as defined above, but that now we decide that for certain important cities, we want to
-store much more information. Things like "most visited touristic places", "gastronomic districts", "tallest buildings"...
+store much more information. Things like *tallest building*, *best restaurant*, ...
 things that just don't make sense for most cities except mega cities. Well, why not call our type `MegaCity`!? We can `extend`
 our existing type to allow that to exist in our program:
 
