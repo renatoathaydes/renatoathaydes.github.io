@@ -13,7 +13,7 @@ Every game you've ever played, every animation you've watched on the Internet, e
 someone (or many people) to write computer instructions that specify in minute detail how everything should look, behave,
 change, react. It may look like an incredibly daunting task, and it is! But it is also one of the most fun tasks you can imagine!
 With only a computer, some free software and, most importantly, a good knowledge of programming, you can create anything
-that you are able to envision. There is no limits!
+that you are able to envision. There are no limits!
 
 And the best thing is that not only is programming a lot of fun, learning it means you will have no trouble getting a job
 anytime soon. And with a pretty good paycheck too, just about anywhere on the planet.
@@ -252,7 +252,7 @@ if you have a value whose type is `Integer`, you immediately know that you can:
 * many other things! Type a number followed by a `.` to see what else you can do with it.
 
 > You may notice that Integers and Floats contain several methods that are equivalent to mathematical operations, such as
-  `plus`, `minus`, `divided`, `remainder`, `times`... which are equivalent to `+`, '-', '/', '%', '*' respectively. That's
+  `plus`, `minus`, `divided`, `remainder`, `times`... which are equivalent to `+`, `-`, `/`, `%`, `*` respectively. That's
   because when you write `2 + 2`, Ceylon actually interprets this as `2.plus(2)`, which you can also write if you prefer.
   Later we will see how this allows anyone to create types that can be used with those operators.
 
@@ -638,10 +638,25 @@ These are called `Iterable`, while the ones that use square-brackets are called 
 They behave much the same way, except that Iterables are evaluated lazily.
 Roughly anywhere an `Iterable` is required, you can use a `Sequential`, but not the other way around.
 
-A special kind of Sequence is a `Range`. A range can be expressed as follows:
+If you have two Iterables which you want to treat as a single one, you can use the `chain` method *chain* one Iterable
+to the other, giving a single Iterable:
 
 {% highlight ceylon %}
-value zeroToHundred = 0..100;
+value a = [1, 2, 3];
+value b = [10, 11];
+assert(a.chain(b).sequence == [1, 2, 3, 10, 11]);
+{% endhighlight %}
+
+> Notice that in the example above, the chain method returns an Iterable which is converted to a Sequence, using the `sequence`
+  method, before we compare it to the expected value. That's necessary because Iterable, being a lazily-evaluated structure,
+  does not guarantee stability of its elements, so comparing Iterables is generally a bad idea. If you need to ensure stability
+  of items on more than one iteration or need to compare Iterables with something else, always convert it to a Sequence first.
+
+A special kind of Sequence is `Range`. A range can be expressed as follows:
+
+{% highlight ceylon %}
+value zeroToTen = 0..10;
+assert(zeroToTen == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 value lowerCaseCharacters = 'a'..'z';
 value firstFiveUpperCaseLetters = 'A':5;
 {% endhighlight %}
@@ -704,7 +719,8 @@ To do that, it requires an initial value, besides the function to be applied. We
 all items in a list (the initial value we give is `1.0` because it is the *neutral* value for multiplications):
 
 {% highlight ceylon %}
-function multiplyAll(Float* numbers) => numbers.fold(1.0, (Float partial, Float elem) => partial * elem);
+function multiplyAll(Float* numbers) =>
+      numbers.fold(1.0, (Float partial, Float elem) => partial * elem);
 
 // this prints 100.0
 print(multiplyAll(2.0, 5.0, 10.0));
@@ -713,7 +729,8 @@ print(multiplyAll(2.0, 5.0, 10.0));
 Comprehensions can also be used to eliminate some items from a list, keeping only the ones we are interested in (in other words, filter):
 
 {% highlight ceylon %}
-value greetingsStartingWithH = { for (greeting in internationalGreetings) if (greeting.startsWith("H")) greeting };
+value greetingsStartingWithH = { for (greeting in internationalGreetings)
+                                 if (greeting.startsWith("H")) greeting };
 print(greetingsStartingWithH);
 {% endhighlight %}
 
@@ -726,13 +743,13 @@ Which prints:
 The same can also be achieved with the `filter` method:
 
 {% highlight ceylon %}
-value greetingsStartingWithH = internationalGreetings.filter(String.startsWith("H"));
+value greetingsStartingWithH = internationalGreetings.filter((String s) => s.startsWith("H"));
 {% endhighlight %}
 
 Awesome or what?
 
-Besides `for`, there is another way of looping called `while`. You can use `while` when you can to loop while some condition
-is `true`.
+Besides `for`, there is another way of looping called `while`. You can use `while` when you want to loop as long as some
+condition holds `true`.
 
 A basic use of `while` would be to allow the user to run a program again and again without having to re-start it:
 
@@ -874,7 +891,7 @@ figuring out most of it, and every new programmer can help finding better and sm
 
 I hope that this tutorial has made you excited about the possibilities of writing code with Ceylon.
 A lot of things have been covered: types, values, functions, lists, conditionals, loops, comprehensions!
-But there still is many more to learn: custom types, interfaces, alias, objects, mutability, lambdas, polymorphism, enumerated types,
+But there still is many more to learn: custom types, interfaces, alias, objects, mutability, polymorphism, enumerated types,
 parameterized types, importing/exporting modules, using third-party [libraries](https://modules.ceylon-lang.org), and so much more.
 These, I hope, will be the subject of subsequent parts of this tutorial, so stay tuned!
 
