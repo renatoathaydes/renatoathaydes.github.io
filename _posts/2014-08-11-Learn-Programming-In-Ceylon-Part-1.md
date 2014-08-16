@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Learn Programming in Ceylon - for beginners
+title: Learn Programming in Ceylon - Part 1
 ---
 
 
@@ -11,7 +11,24 @@ things. Every single app, or program, you ever used on a computer was created mo
 
 Every game you've ever played, every animation you've watched on the Internet, every website you've visited, required
 someone (or many people) to write computer instructions that specify in minute detail how everything should look, behave,
-change, react. It may look like an incredibly daunting task! But also one of the most fun tasks you can imagine!
+change, react. It may look like an incredibly daunting task, and it is! But it is also one of the most fun tasks you can imagine!
+With only a computer, some free software and, most importantly, a good knowledge of programming, you can create anything
+that you are able to envision. There is no limits!
+
+And the best thing is that not only is programming a lot of fun, learning it means you will have no trouble getting a job
+anytime soon. And with a pretty good paycheck too, just about anywhere on the planet.
+
+This tutorial is mostly for people with little or no experience in programming. It may also be useful for experienced programmers
+who want to learn new concepts using one of the newest programming languages around - Ceylon.
+
+Learning Ceylon is certainly a very good way to be introduced to programming because it contains, in a package that is
+much more consistent than most alternative languages, all features you would expect of a very modern language (Ceylon 1.0 was
+released in the end of 2013). By learning Ceylon, you will be able to easily understand and pick up many other similar
+programming languages.
+
+But before we get started with writing code, a little bit of history to give some context.
+
+## A short history of programming languages
 
 These days, very few people work on the processor-instructions level, which is done in a kind of language called
  [Assembly](http://en.wikipedia.org/wiki/Assembly_language).
@@ -20,7 +37,7 @@ That's because to achieve anything much useful in Assembly would require enormou
 to map directly to machine instructions. Basically, it is a machine-friendly language, not a human-friendly one.
 
 Luckily, people have created many higher level languages overtime that made it easier for humans to write code that can
-later be translated to Assembly by other programs, and then executed by computers. Programs that do the translation are called
+later be translated to Assembly by other programs, which can then be executed by computers. Programs that do the translation are called
 **compilers** or **interpreters**.
 
 One of the first such higher level languages was [Fortran](http://en.wikipedia.org/wiki/Fortran), created in the early 1950's.
