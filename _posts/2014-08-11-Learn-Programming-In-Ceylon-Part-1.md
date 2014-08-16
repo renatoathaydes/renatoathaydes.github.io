@@ -6,7 +6,7 @@ title: Learn Programming in Ceylon - Part 1
 
 ## Introduction
 
-Programming is one of the most rewarding activities there is. Once you master, you will be able to create all sorts of
+Programming is one of the most rewarding activities there is. Once you master it, you will be able to create all sorts of
 things. Every single app, or program, you ever used on a computer was created mostly by computer programmers.
 
 Every game you've ever played, every animation you've watched on the Internet, every website you've visited, required

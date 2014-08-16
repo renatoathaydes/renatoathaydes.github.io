@@ -1,6 +1,6 @@
-# Learn Programming In Ceylon - Part 2
+## Under construction!
 
-# Under construction!
+Will update this soon! Currently this is not done at all!
 
 ## Union types
 
