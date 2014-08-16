@@ -286,7 +286,7 @@ window and hit Enter. But after you do that, you should see our greeting message
 
 This is really awesome, isn't it?
 
-## A little maths fun
+## Implementing a Maths Helper
 
 How about a program that does maths for us?
 
@@ -343,7 +343,7 @@ Actually you could have used many other mathematical operators: `+` (plus), `-` 
 print(((2.5 * 3.0) ^ 2) + ((10_000 / 7)  % 37));
 {% endhighlight %}
 
-## The `if` statement
+## The `if` statement and boolean expressions
 
 In the previous section, we made use of another Ceylon function, `parseFloat`, to turn the `String` the user entered with
 the keyboard into a `Float` (ie. a floating-point number) so that we can actually multiply the numbers.
@@ -367,6 +367,28 @@ now, it's enough to say that `parseFloat` gives us either a `Float` or `null`, a
 `null`, we must make sure that what we have is not `null` (which is what `exists` does), which means it can only be a `Float`.
 
 You can try using `if` with any *boolean* expression (something that evaluates to either `true` or `false`).
+A boolean expression usually contains one or more of the comparison or logical operators:
+
+* `==`       - equals
+* `!=`       - not equals
+* `>`        - greater than
+* `>=`       - greater than or equal to
+* `<`        - less than
+* `<=`       - less than or equal to
+* `&&`       - logical AND
+* `||`       - logical OR
+* `!`        - logical NOT
+
+> If you don't know much about logic, that's fine. All you need to know for now is that an AND condition is true if and
+  only if both operands are true. An OR condition is true if and only if one or more of its operands are true.
+
+The following keywords can also be part of a boolean expression (don't worry if you don't know what `null` or `Iterable` mean,
+they will be explained shortly):
+
+* `exists`   - checks something is not `null`
+* `nonempty` - checks an Iterable is contains at least one element
+* `in`       - checks an element is present in an Iterable
+* `is`       - checks a value is an instance of some type
 
 For example:
 
@@ -376,6 +398,7 @@ if (5 > 0) {
 }
 
 value x = 10;
+value y = 20;
 
 if (x <= 0) {
     print("This will be printed if x is less than, or equal to 0");
@@ -385,12 +408,30 @@ if (x <= 0) {
     print("This is printed if x is greater than 5");
 }
 
+if (10 < x <= 20) {
+    print("x is greater than 10 and less than or equal to 20");
+}
+
+if (x > 10 && y > 10) {
+    print("Both x and y are greater than 10");
+}
+
 if (4 == 4) {
     print("The '==' operator checks for equality... 4 is equal to 4!");
 }
+
+if (x == 5 || y == 5) {
+    print("x or y is 5, maybe both...");
+}
+
+Boolean veryLargeX = x > 1k;
+
+if (!veryLargeX) {
+    print("X is not that large");
+}
 {% endhighlight %}
 
-## Working with `function`s
+## Working with functions
 
 We have already defined `function` as a piece of code which can be executed by either other functions or by the Ceylon
 runtime.
@@ -410,11 +451,9 @@ Float? askUserForNumber(String question) {
 shared void run() {
     // shorthand notation for functions
 	function multiply(Float a, Float b) => a * b;
-	function add(Float a, Float b) => a + b;
-	
-	void printResult(Float(Float, Float) operation, Float x, Float y) {
+	function add(Float a, Float b) => a + b;	
+	void printResult(Float(Float, Float) operation, Float x, Float y) =>
 		print("Result: ``operation(x, y)``");
-	}
 	
 	value multiplication = 0;
 	value addition = 1;
@@ -437,7 +476,19 @@ inside another function), we must declare its return type (which is the same as 
 Now, inside the `run` function, we defined two new functions, `multiply` and `add`, using the short notation for functions
 with the fat arrow `=>`.
 This kind of function can only contain one expression. This is a very common style in Ceylon because usually functions
-are broken up into many smaller functions until they become a simple expression. The long notation for functions is to
+are broken up into many smaller functions until they become a simple expression. In fact, a function defined in this way
+does not even need to have a name. If you just need to pass a function as an argument to another function, but you don't
+need to use it anywhere else, you can declare the function without a name as you invoke the other function, as in this
+example:
+
+{% highlight ceylon %}
+printResult((Float x, Float y) => x * y, 10.0, 3.0);
+{% endhighlight %}
+
+This kind of function that does not have a name is called an *anonymous function*. It can also be called a *lambda*, as
+the idea has its roots in the [lambda calculus](http://en.wikipedia.org/wiki/Lambda_calculus).
+
+The long notation for functions is to
 use `{ ... }` to wrap all statements the function should execute (like we did for the `askUserForNumber` and `run` functions).
 
 We then defined a function called `printResult` which takes another function, called `operation`, with a type
@@ -492,16 +543,16 @@ The resulting program may be a little longer than it was before, but writing cod
   to do its job, and what is gives back (the return type).
 
 If the name of the function is not enough for us to understand what it does, well, it probably has a bad name in the first place...
-but we should also look at the type signature of the function, which is basically the types of the arguments (what we pass in)
-and the type of the return value (what we get out). This is valuable information!
+but we should also look at the type signature of a function, which is made up by the types of the arguments (what we pass in)
+and the type of the return value (what we get out), when we need to find out the purpose of a function. This is valuable information!
 
 ## Representing and using lists
 
 Our maths program is starting to become somewhat useful. But it's still quite limited. For example, it only takes two numbers
 as input. What if we wanted to be able to allow the user to enter any number of inputs to perform more complex operations?
 
-We must have a way to represent a list, or sequence of values, not only single values. Enter `Tuple` and the more generic
-`Sequence`:
+We must have a way to represent a list, or sequence of values, not only single values.
+You can declare and use a list using the following syntax:
 
 {% highlight ceylon %}
 value sequence = [1,2,3];
@@ -565,194 +616,275 @@ if (nonempty s) {
 }
 {% endhighlight %}
 
-> You may see some Ceylon code that uses curly braces to represent lists, as in `{Integer+} list = {1, 2};`.
-  These are called `Iterable`, while the ones that use square-brackets are called `Sequential`.
-  They behave much the same way, except that Iterables are evaluated lazily.
-  Roughly anywhere an `Iterable` is required, you can use a `Sequential`.
-  For details, visit the [Tour of Ceylon](http://ceylon-lang.org/documentation/1.0/tour/sequences/).
+An alternative way to represent lists uses curly braces rather than square-brackets, as in `{Integer+} list = {1, 2};`.
+These are called `Iterable`, while the ones that use square-brackets are called `Sequential`.
+They behave much the same way, except that Iterables are evaluated lazily.
+Roughly anywhere an `Iterable` is required, you can use a `Sequential`, but not the other way around.
 
-
-## Union types
-
-Look at the type signature of `askUserForNumber`:
+A special kind of Sequence is a `Range`. A range can be expressed as follows:
 
 {% highlight ceylon %}
-Float? askUserForNumber(String question) { ... }
+value zeroToHundred = 0..100;
+value lowerCaseCharacters = 'a'..'z';
+value firstFiveUpperCaseLetters = 'A':5;
 {% endhighlight %}
 
-We can see that we must provide a `String` with a question (likely a question to be shown to the user) and we get back a
-`Float?`. Here we have a very interesting new concept to learn, which is called union types.
+Anything that is `Ordinal` (ie. have a natural ordering, like Integers and Characters) can be put into a Range.
 
-> An union type is a type formed by two or more different types. A value always has a single type, but a function may accept
-or return values of different types. That's why union types exist.
-
-`Float?` is synonym with `Float | Null`, which reads as *float or null*. This means that a value of this type must either
-be a `Float` like `3.1415` or a `null`.
-
-This makes sense, because when we ask the user to enter a number, we cannot be sure that the user is always going to give us
-something that is a valid number.
-
-To try this out, you can do something like this:
+A really interesting thing you can use Ranges for is to extract just parts of other lists:
 
 {% highlight ceylon %}
-value x = askUserForNumber("Enter a number (x): ");
-print(x exists then "Thank you!" else "Sorry, that's not a number.");
+value list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+value firstFiveElements = list[0:5];
+value thirdToEigthElements = list[2..7]; // indexes start from 0, so the 3rd element has index 2
 {% endhighlight %}
 
-> We show above how you can use `then` ... `else` directly in a single expression... you just need something that evaluates
-to a Boolean before `then`, and an expression that evaluates to some value in case that's true and another in case that's not.
+> For details about Iterable, Sequential and Range, visit the [Tour of Ceylon](http://ceylon-lang.org/documentation/1.0/tour/sequences/).
 
-Any number of types can be part of an union. As an example:
+## Loops and for-comprehensions
+
+Now that we know how to create lists, we can iterate over them to do something with each item using the `for` statement:
 
 {% highlight ceylon %}
-// we must import the 'type' function to find the type of a value
-import ceylon.language.meta { type }
-
-shared void run() {
-	void show(String|Boolean|Integer input) {
-		print("``input`` is of type ``type(input)``");
-	}
-	show("hello");
-	show(true);
-	show(400);
+value internationalGreetings = ["Hi", "Ola", "Hej", "Privyet", "Salut"];
+for (greeting in internationalGreetings) {
+    print(greeting);
 }
 {% endhighlight %}
 
-This is example is really artificial, but serves to demonstrate a few new concepts:
+This will print each international greeting in turn.
 
-* the first line is a comment (ie. it is not treated as code) because it starts with `//`. Comments can also be wrapped
-between `/*` and `*/` to span several lines.
-* only a few functions and objects are available to Ceylon code without having to be explicitly imported. Most functions
-from the Ceylon SDK (Software Development Kit) need to be explicitly imported, as shown above for the `type` function.
-* Union types can be formed by many different types.
+> A `String` is a `[Character*]` in Ceylon, so you can also iterate over each character of it! For example:
+  `for (letter in "My Text") { /* do something with each character */ }`
 
-Once we learn to define our own types, union types will become much more interesting. That's the topic of the next section!
-
-
-## Defining our own types
-
-All types we have talked about so far (`String`, `Boolean`, `Float`, `Integer`, `Character`) are defined by Ceylon itself
-and available to any Ceylon programs. We can achieve a lot using only these types, but to model the real world, it is very
-convenient to be able to define our own types so that it becomes more natural to reason about our the problems we are trying
-to solve.
-
-Let's imagine we are trying to write a program to store information about cities of the world. We know that every city has
-a name. Every city has a population. Every city is located in some country. And so on. Let's pretend we only care about these
-features of cities. How can we model this in our programs?
-
-One way would be to define a type for `City`. In Ceylon, we can define a type with a `class`:
+Another way to iterate over elements of a list and do something with them is to use a **comprehension**.
+Comprehensions also use the `for` keyword, but unlike the `for` statement we used above, a comprehension evaluates to a value:
 
 {% highlight ceylon %}
-class City(shared String name,
-           shared Integer population,
-           shared String country) {}
-
-// let's create a City
-value newYork = City("New York", 8_405_837, "USA");
-
-// we can make it clearer what each value means by using the named-argument syntax
-value berlin = City {
-    name = "Berlin";
-    population = 4_000_000;
-    country = "Germany";
-};
-
-assert(newYork.population > 8M);
-assert(berlin.country == "Germany");
+value sizeOfGreetings = { for (greeting in internationalGreetings) greeting.size };
+print(sizeOfGreetings);
 {% endhighlight %}
 
-## Polymorphism - extending existing types
+Running this program prints:
 
-Imagine that we have class `City` as defined above, but that now we decide that for certain important cities, we want to
-store much more information. Things like *tallest building*, *best restaurant*, ...
-things that just don't make sense for most cities except mega cities. Well, why not call our type `MegaCity`!? We can `extend`
-our existing type to allow that to exist in our program:
+```
+{ 2, 3, 3, 7, 5 }
+```
+
+This is usually referred to as `mapping` (from Strings to sizes). In fact, the above is equivalent to using the `map`
+method, which takes a function (in this case, the method `size` of `String`) and applies it over each item of the list,
+returning the resulting *mapped* values:
 
 {% highlight ceylon %}
-
+value sizeOfGreetings = internationalGreetings.map(String.size);
 {% endhighlight %}
 
+A related method, which we will need later to complete our maths program, is `fold`.
+Whereas `map` applies a function to each item in the list, `fold` uses a function to *collapse* the list into a single value
+by accumulating the result of applying the function to each element in sequence.
 
-## Using aliases
-
-Sometimes, we want to declare a type which is very simple, or similar to another existing type, but we still believe it is
-useful to make that type to make code easier to understand.
-
-For example, in the above example, country is represented as just a `String`. That might make sense if we do not really care
-about countries to solve our problem. But we might still want to create a type for `Country` for clarity. We can create an
-`alias` as shown below:
+To do that, it requires an initial value, besides the function to be applied. We can use that to, for example, multiply
+all items in a list (the initial value we give is `1.0` because it is the *neutral* value for multiplications):
 
 {% highlight ceylon %}
-alias Country => String;
+function multiplyAll(Float* numbers) => numbers.fold(1.0, (Float partial, Float elem) => partial * elem);
 
-// and now we can update the definition of City
-class City(shared String name,
-           shared Integer population,
-           shared Country country) {}
+// this prints 100.0
+print(multiplyAll(2.0, 5.0, 10.0));
 {% endhighlight %}
 
-Aliases do not create new types, they simply 'rename' an existing type.
-
-However, sometimes we may face situations where we need a union of several types. In these occasions, alias can be a life-saver!
-
-Imagine we want to model a game of cards to create a game. A simple way would be like this:
+Comprehensions can also be used to eliminate some items from a list, keeping only the ones we are interested in (in other words, filter):
 
 {% highlight ceylon %}
-// suites
-class Spades() {}
-class Diamonds() {}
-class Hearts() {}
-class Clubs() {}
-
-// ranks
-class Ace() {}
-class Jack() {}
-class Queen() {}
-class King() {}
-
-// definition of a playing card
-class Card(shared Integer|Ace|Jack|Queen|King rank,
-	       shared Spades|Diamonds|Hearts|Clubs suit) {}
-
-// example of a card
-Card aceOfSpades = Card(Ace(), Spades());
+value greetingsStartingWithH = { for (greeting in internationalGreetings) if (greeting.startsWith("H")) greeting };
+print(greetingsStartingWithH);
 {% endhighlight %}
 
-We could make the definition of `Card` much nicer by using aliases:
+Which prints:
+
+```
+{ Hi, Hej }
+```
+
+The same can also be achieved with the `filter` method:
 
 {% highlight ceylon %}
-
-alias Suit => Spades|Diamonds|Hearts|Club;
-alias Rank => Integer|Ace|Jack|Queen|King;
-
-// definition of a playing card
-class Card(shared Rank rank,
-	       shared Suit suit) {}
-
-// cards can still be created in the exact same way
-Card aceOfSpades = Card(Ace(), Spades());
-Card twoOfHearts = Card(2, Hearts());
-Card queenOfClubs = Card(Queen(), Clubs());
+value greetingsStartingWithH = internationalGreetings.filter(String.startsWith("H"));
 {% endhighlight %}
 
-## Enumerated types
+Awesome or what?
 
-In the previous example, `alias` was a really nice way to solve the problem. But it may not work in some occasions where
-the types we want to alias are not so simple.
+Besides `for`, there is another way of looping called `while`. You can use `while` when you can to loop while some condition
+is `true`.
 
-As an example, let's suppose that in our game, we need to be able show some information about the cards to help beginners.
-
-This wouldn't work so well with the code shown above. If we try to print a card, say `aceOfSpades`, this is what we would get:
-
-<code>helloCeylon.Card@2111fce</code>
-
-Not nice! This is the default implementation of the `string` property of every user-defined type 
+A basic use of `while` would be to allow the user to run a program again and again without having to re-start it:
 
 {% highlight ceylon %}
+String askUser(String question) {
+	process.write(question);
+	return process.readLine();
+}
 
+while(askUser("Do you want to continue?").lowercased in ["y", "yes"]) {
+	// continue program
+}
 {% endhighlight %}
 
 
-For more of the basics, have a look at the [Ceylon basics](http://ceylon-lang.org/documentation/1.0/tour/basics/) in the Tour of Ceylon.
+## Variadic parameters
+
+Variadic parameters allow a function to take any number of arguments. For example:
+
+{% highlight ceylon %}
+void printStrings(String+ strings) {
+    for (string in strings) {
+        print(string);
+    }
+}
+
+printStrings("Apple", "Orange", "Pineapple");
+
+// does not compile, must provide at least one String
+printStrings();
+{% endhighlight %}
+
+To allow empty lists, use `String*` instead of `String+`.
+
+You can pass an Iterable to a function that has variadic parameters by using the *spread* operator (`*`):
+
+{% highlight ceylon %}
+value list = ["White", "Blue", "Red", "Black"];
+printStrings(*list);
+{% endhighlight %}
+
+A variadic parameter must always be the last parameter of a function. The following are valid functions:
+
+{% highlight ceylon %}
+function myFunction(Integer a, String* b) { ... }
+function otherFunction(Boolean a, Integer b, Float+ c) { ... }
+// a function which takes at least 3 Booleans
+function oneMoreFunction(Boolean a, Boolean b, Boolean+ c) { ... }
+{% endhighlight %}
+
+Enough of theory... now we are ready to write some cool stuff!
+
+## Improving the Maths Helper
+
+Let's get back to our Maths Helper program... we have enough knowledge now to extend it so that we can let the
+user enter as many operands as he or she wishes. We can also let the user choose to re-run the program again and again
+without re-starting it.
+
+With these requirements in hand, we are ready to start coding!
+
+Below is a possible solution to this problem. Before you look at it, you should definitely try to write it yourself.
+You can re-use all the useful functions we have already defined above, like `askUserForNumber`, `multiply`, `add`...
+If you get stuck, you may have a look at the solution below to see how it solves the problem you're having. But notice that
+this solution is by no means the only solution! You can certainly have a different solution that works just as well and
+even better!
+
+{% highlight ceylon %}
+String askUser(String question) {
+	process.write(question);
+	return process.readLine();
+}
+
+Float? askUserForNumber(String question) => parseFloat(askUser(question));
+
+{Float*} askUserForNumbers(String question, {Float*} previousAnswers) {
+	value answer = askUserForNumber(question);
+	if (exists answer) {
+		return askUserForNumbers(question, previousAnswers.chain { answer });
+	} else {
+		return previousAnswers;
+	}
+}
+
+void runMathsProgram() {
+	function multiplyAll(Float* numbers) =>
+			numbers.fold(1.0, (Float x, Float y) => x * y);
+	function addAll(Float* numbers) =>
+			numbers.fold(0.0, (Float x, Float y) => x + y);
+	void printResult(Float(Float*) operation, Float* numbers) =>
+		print("Result: ``operation(*numbers)``");
+	
+	value multiplication = 0;
+	value addition = 1;
+	
+	value option = askUserForNumber("Enter: * ``multiplication`` for multiplication,
+	                                        * ``addition`` for addition: ");
+	if (exists option, option == multiplication || option == addition) {
+		value numbers = askUserForNumbers("Enter a number (or just Enter to continue): ", {});
+		printResult(option == multiplication then multiplyAll else addAll, *numbers);
+	} else {
+		print("Invalid option");
+	}
+}
+
+"Run the Maths helper program."
+shared void run() {
+	value stars = "*".repeat(10);
+	print(stars + " Welcome to the Maths helper " + stars);
+	runMathsProgram();
+	while(askUser("Do you want to start again? [yes/no]: ").lowercased in ["y", "yes"]) {
+		runMathsProgram();
+	}
+	print("Bye!");
+}
+{% endhighlight %}
+
+## Some general software development remarks
+
+A lot of things can still be much improved in this program. For example, we could support many more operations.
+Or we could provide more meaningful error messages when the user enters invalid input.
+
+In business terms, the initial goal when developing a new product is to release a MVP (Minimum Viable Product). The above
+program would be more like a `0.1-beta` version of our product. With each improvement that you make or feature that you add,
+you get closer to creating a program that people might actually be interested in using (the `1.0.0` version).
+
+But no program is ever complete. There's always something that can be made better, or bugs to be fixed once the program
+gets a little more complex, or things that can be removed because they no longer make sense.
+That's why programs always have version numbers. It is an acknowledgement that software development is an iterative process.
+
+You create something small and simple at first, then gradually build more and more on top of it.
+
+It is just like learning code.
+
+You will never know everything there is to know, and given the relatively young age or the software development profession,
+nobody really knows what is the best way to create software yet. And this is what makes programming so exciting! We're still
+figuring out most of it, and every new programmer can help finding better and smarter ways to code.
+
+## Where to now?
+
+I hope that this tutorial has made you excited about the possibilities of writing code with Ceylon.
+A lot of things have been covered: types, values, functions, lists, conditionals, loops, comprehensions!
+But there still is many more to learn: custom types, interfaces, alias, objects, mutability, lambdas, polymorphism, enumerated types,
+parameterized types, importing/exporting modules, using third-party [libraries](https://modules.ceylon-lang.org), and so much more.
+These, I hope, will be the subject of subsequent parts of this tutorial, so stay tuned!
+
+If you don't fully understood some concept, write code to experiment with it. All experienced programmers
+agree that the best way to learn code is to write code. So get your hands dirty and write as much code as you can.
+
+There will be times when you will get frustrated because something doesn't work. This is natural and is an absolute
+integral part of programming. As you get more experienced, you will still get stuck sometimes, but on harder and harder
+problems. But there are many ways to get over issues.
+
+The first one should always be to think hard about what is going wrong.
+Usually you get stuck because one of your assumptions about the code is not quite right. Test your assumptions by writing
+simple snippets of code that verify them.
+
+The second thing you should try is have a look at the [Tour of Ceylon](http://ceylon-lang.org/documentation/1.0/tour).
+Even though its language is quite advanced (it is mostly aimed at Java developers), there is lots of examples and in-depth
+explanations which are probably going to go a long way towards helping you figure out things.
+
+If all your assumptions are correct, the Tour did not help much and still your code does not work, feel free
+to post a question on the [Ceylon discussion group](https://groups.google.com/forum/#!forum/ceylon-users)!
+There's lots of people there who will be really happy to help. No question is a stupid question.
+All of us who write code probably had the same troubles you're likely to get into, so we know exactly
+how it feels and best of all, how to get over them!
+
+That's it for now! Let me know that you enjoyed this tutorial by *starring* this repo! The more stars I get, the more
+motivation I will have to keep writing and covering the more advanced (and fun) features of Ceylon.
+
+Happy coding!
 
 
