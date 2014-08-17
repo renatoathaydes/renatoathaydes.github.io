@@ -166,7 +166,7 @@ large type name again and again.
 
 > Aliases do not actually create new types, they simply 'rename' an existing type or a simple type expression.
 
-# Custom types with classes
+## Custom types with classes
 
 Imagine we want to model playing cards to create a cards game. With what we know so far, we would have to improvise and use
 types like `String` and `Integer`, or some aliases, to represent the cards. That might actually work, but there's a much
@@ -256,15 +256,185 @@ alias Rank => Ace|Two|Three|Four|Five|Six|Seven|Jack|Queen|King;
 Now it is just impossible to even try to instantiate an invalid card! The problem is that enumerating all values might not
 be always possible. In that case, the previous solution might be the only viable alternative. But keep in mind that every
 time you run into this problem, you should try to minimize the possibility of a run-time error being possible, as that can
-get quickly un-manageable and is the source of countless bugs in real software.
+quickly become un-manageable and is the source of countless bugs in real software.
 
-# Methods
+## Interfaces
 
-We have met quite a few *methods* already. A method is simply a function that belongs to a class.
+Quite often, we come across concepts which have the same kind of properties, but differ only in the details of how they behave.
+Continuing with our game, we may think of one example of this as being a dealer. Whatever the game we decide to create
+may be, we will probably need a dealer. There are many things a dealer can do, and most of them do not depend on which
+game is being played, such as dealing the cards, shuffling and perhaps comparing players' hands.
+
+This is a good example of where we could use an `interface` to model a fairly abstract concept.
+
+> An interface is an abstract definition of a particular concept which we want to model. In other words, it can be seen
+  as a contract which may be satisfied by concrete or abstract classes to provide the actual behavior.
+
+Before we define our first interface, we must formally define what a `method` is:
+
+> A method is simply a shared function that is declared inside a class or interface. It is useful to make that distinction
+  because methods can have access to internals of a class which are not available to other functions, so methods, unlike
+  functions, can be seen as being an integral part of the class or interface in which they are defined.
+
+Ok, now that we know the theory, let's give that a go:
+
+{% highlight ceylon %}
+// first, some definitions
+alias Hand => {Card*};
+alias Pack => {Card+};
+
+interface Dealer {    
+    shared formal Pack shuffle(Pack pack);
+    
+    shared formal Hand dealHand(Pack cards);
+    
+    shared formal Comparison compare(Hand hand1, Hand hand2);
+    
+    shared default {Hand*} deal(Pack cards, Integer playersCount) =>
+        (1..playersCount).map((Integer i) => dealHand(cards));
+        
+}
+{% endhighlight %}
+
+> Notice that each method of an interface which does not have a default implementation must be declared `formal`.
+  Default implementations can be provided and must be declared `default`.
+
+`Dealer` is just a concept, it does not define how to do anything (notice how the formal methods have no body)
+except for the trivial case of defining the `deal` method, as that can be easily done in terms of the formal method
+`dealHand`, even if we do not yet have a concrete implementation of that method. The actual behavior of a `Dealer` must
+be provided by implementation classes.
+
+This is very useful as it allows us to write other parts of the game which do not depend upon the specific rules of our
+game before we even know what our game rules are going to look like. And notice that there could even be more than one
+game (and therefore different implementations of `Dealer`), but the parts of the game which will not be impacted by the
+specifics of each game can still be written only once.
+
+Notice that, because interfaces do not implement all the behavior that would be necessary to actually use an instance of
+it, you cannot instantiate an interface directly!
+
+The following results in a compiler error (so you can't even run this program):
+
+{% highlight ceylon %}
+// does not compile!
+value dealer = Dealer();
+
+// what would this return if this compiled?
+value hand = dealer.dealHand(pack);
+{% endhighlight %}
+
+For this reason, before we can run our program, we will have to provide at least one implementation for `Dealer`.
+
+### Benefiting from syntax-sugar for operators
+
+Ceylon provides some *syntax sugar* to make code more readable through the use of certain interfaces.
+
+For example, in Part 1, we saw how the `Integer`'s methods `plus`, `minus`, `divided`, `times` and
+`remainder` are equivalent to using the operators `+`, `-`, `/`, `*` and `%` respectively.
+
+So, instead of writing `2.plus(2) == 4` we can write `2 + 2 == 4`.
+
+The only reason why that is possible is because `Integer` satisfies the interfaces `Summable` (which
+defines `plus`, or `+`), `Numeric` (which defines `minus`, `divided` and `times`, or `-`, `/` and `*`) and `Integral`
+(which defines `remainder`, or `%`).
+
+Anyone could write a type that satisfies `Summable` to be able to use the `+` operator to sum two instances of that type.
+
+As an example, we can make a Summable Iterable so that we can *add* two Iterables:
+ 
+> Notice that in Ceylon, you cannot add two Iterables with the `+` operator. The reason for that is that doing that would
+  likely break the contract of `Summable` that the `+` operation should be associative.
+  For example, { 1, 2 } + { 3 } would have to be the same as { 3 } + { 1, 2 }. In the definition of `MyList` below, we
+  get around that fact by adding the constraints that `MyList` contains only `Integer`s and is always sorted, so that 
+  `MyList { 1, 2 } + MyList { 3 } == MyList { 3 } + MyList { 1, 2 }`.
+
+{% highlight ceylon %}
+// necessary renaming to avoid clash with Iterable.sort in MyList
+import ceylon.language { doSort = sort }
+
+"An always sorted Iterable containing Integers that can be summed."
+class MyList({Integer*} integers) satisfies Summable<MyList> & Iterable<Integer> {
+    
+    {Integer*} _integers = doSort(integers);
+    
+    shared actual MyList plus(MyList other) =>
+            MyList(this._integers.chain(other._integers));
+    
+    shared actual Iterator<Integer> iterator() => _integers.iterator();
+    
+}
+
+MyList result = MyList { 1, 2 } + MyList { 3 };
+assert(result.sequence == [1, 2, 3]);
+{% endhighlight %}
+
+The example above, incidentally, shows how a class can declare that it satisfies an interface, or, in this case, two
+interfaces.
+
+> A class may declare that it satisfies more than one interface by using the `&` symbol between each interface.
+  What this symbol does is similar to what `|` does for union types, but results in an intersection type. Intersection
+  types and union types are analogous to sets in set theory. If you look at a type as a set of properties and methods,
+  then an union of the two types is the sum of all properties and methods of the two types. The intersection
+  of two types is the set of properties and methods which are common to both types. That is why, in the example above,
+  an instance of `MyList`, which satisfies types `Summable<MyList>` and `Iterable<Integer>` can be assigned to either type.
+
+It also shows how you can import an element and rename it to avoid name clashes (if we didn't rename `sort` to `doSort`,
+it would have clashed with `Iterable`'s own `sort` method inside the definition of `MyList`, causing a compiling error
+because we are not allowed to use an inherited member in the class initializer).
+
+The `in` operator maps to method `contains` of `Iterable`, so because `MyList` satisfies `Iterable`, we can use the `in`
+operator to test if a `MyList` contains a certain element:
+
+{% highlight ceylon %}
+assert(1 in MyList { 1, 2, 3 });
+assert(2 in MyList { 1, 2, 3 });
+assert(3 in MyList { 1, 2, 3 });
+{% endhighlight %}
+
+> Notice that when a class satisfies an interface, it gets all of its default methods for free! That's why we can use the
+  `in` operator with `MyList`, as shown above. We could also use many more methods and properties from `Iterable`:
+  `first`, `last`, `find`, `sort`, `any`, `every`...
+
+If we try to compare two instances of `MyList`, we will notice that the results will not be as expected:
+
+{% highlight ceylon %}
+// this assertion fails
+assert(MyList { 1, 2 } == MyList { 1, 2 });
+{% endhighlight %}
+
+That's because of the way the `==` operator works. It maps to the `equals` method of the `Object` abstract class.
+
+Before we explain that in more detail, we must understand what abstract classes are.
+
+## Abstract classes
+
+Finally, the last way in which we can create a type in Ceylon is by declaring an abstract class.
+
+> An abstract class is similar to an interface, but besides having formal and default methods and properties, it can also
+have a parameter list and hold state, like concrete classes. Unlike concrete classes, but like interfaces, abstract 
+classes may not be instantiated.
+
+Let's consider `MyList` again. It explicitly declares only two methods, `MyList plus(MyList other)` and
+`Iterator<Integer> iterator()`. However, because it satisfies interface `Iterable<Integer`, it **inherits** all of its
+methods, so although we can call a lot of methods on `MyList` instances:
+{% highlight ceylon %}
+
+{% endhighlight %}
+
+This operator is equivalent to the `equals` method of the
+`Object` abstract class. All custom types, by default, extend the `Basic` type, which in turn, extends `Object`.
 
 
+TODO
 
 
+# Objects and Enumerated types
+
+In the previous section, we declared a lot of classes which do not have any property, they simply exist to enumerate possible
+values of a suit or a rank.
+
+There is a better way to enumerate values like this in Ceylon using objects.
+
+> An object is an instance
 
 
 
