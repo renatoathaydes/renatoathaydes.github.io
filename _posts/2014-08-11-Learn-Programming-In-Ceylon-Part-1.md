@@ -172,7 +172,7 @@ Finally, you should also have a source file called `run.ceylon` inside the `hell
 {% highlight ceylon %}
 "Run the module `helloCeylon`."
 shared void run() {
-    
+
 }
 {% endhighlight %}
 
@@ -273,7 +273,7 @@ usually don't need to tell it that (unless the value is declared at package-leve
 (which are necessary for it to be able to interpret your programs)... for example, a few of them are `void`,
 `if`, `then`, `else`, `for`, `while` and `in`, which are instructions we will get back to shortly...
 
-> If you really must name something with a keyword, you can scape it with \\i, for example: `value \\ivalue = "Hi"`.
+> If you really must name something with a keyword, you can scape it with `\i`, for example: `value \ivalue = "Hi"`.
 
 Now, instead of just printing a fixed String, let's make Ceylon print a String containing our value (paste the following
 code inside the `run` function):
@@ -386,15 +386,15 @@ now, it's enough to say that `parseFloat` gives us either a `Float` or `null`, a
 You can try using `if` with any *boolean* expression (something that evaluates to either `true` or `false`).
 A boolean expression usually contains one or more of the comparison or logical operators:
 
-* `==`       - equals
-* `!=`       - not equals
-* `>`        - greater than
-* `>=`       - greater than or equal to
-* `<`        - less than
-* `<=`       - less than or equal to
-* `&&`       - logical AND
-* `||`       - logical OR
-* `!`        - logical NOT
+* `==`       : equals
+* `!=`       : not equals
+* `>`        : greater than
+* `>=`       : greater than or equal to
+* `<`        : less than
+* `<=`       : less than or equal to
+* `&&`       : logical AND
+* `||`       : logical OR
+* `!`        : logical NOT
 
 > If you don't know much about logic, that's fine. All you need to know for now is that an AND condition is true if and
   only if both operands are true. An OR condition is true if and only if one or more of its operands are true.
@@ -460,30 +460,30 @@ Check this out!
 {% highlight ceylon %}
 // a little helper function
 Float? askUserForNumber(String question) {
-	process.write(question);
-	value userX = process.readLine();
-	return parseFloat(userX);
+    process.write(question);
+    value userX = process.readLine();
+    return parseFloat(userX);
 }
 
 shared void run() {
     // shorthand notation for functions
-	function multiply(Float a, Float b) => a * b;
-	function add(Float a, Float b) => a + b;	
-	void printResult(Float(Float, Float) operation, Float x, Float y) =>
-		print("Result: ``operation(x, y)``");
-	
-	value multiplication = 0;
-	value addition = 1;
-	value option = askUserForNumber("Enter ``multiplication`` for multiplication, ``addition`` for addition: ");
-	value x = askUserForNumber("Enter x: ");
-	value y = askUserForNumber("Enter y: ");
+    function multiply(Float a, Float b) => a * b;
+    function add(Float a, Float b) => a + b;	
+    void printResult(Float(Float, Float) operation, Float x, Float y) =>
+        print("Result: ``operation(x, y)``");
 
-	// assert we got valid input. If not, an error is thrown so the program can not continue!
-	assert(is Float option, is Float x, is Float y,
-	       option == multiplication || option == addition);
-	
-	value operation = option == multiplication then multiply else add;
-	printResult(operation, x, y);
+    value multiplication = 0;
+    value addition = 1;
+    value option = askUserForNumber("Enter ``multiplication`` for multiplication, ``addition`` for addition: ");
+    value x = askUserForNumber("Enter x: ");
+    value y = askUserForNumber("Enter y: ");
+
+    // assert we got valid input. If not, an error is thrown so the program can not continue!
+    assert(is Float option, is Float x, is Float y,
+            option == multiplication || option == addition);
+
+    value operation = option == multiplication then multiply else add;
+    printResult(operation, x, y);
 }
 {% endhighlight %}
 
@@ -629,7 +629,7 @@ The operator `nonempty` may be used to narrow the type of a list from [Element*]
 [Integer*] sequence = [1, 2];
 if (nonempty s) {
     // this would not compile outside the if block as sequence.first could be null
-	print("First element is ``sequence.first``");
+    print("First element is ``sequence.first``");
 }
 {% endhighlight %}
 
@@ -638,13 +638,14 @@ These are called `Iterable`, while the ones that use square-brackets are called 
 They behave much the same way, except that Iterables are evaluated lazily.
 Roughly anywhere an `Iterable` is required, you can use a `Sequential`, but not the other way around.
 
-If you have two Iterables which you want to treat as a single one, you can use the `chain` method *chain* one Iterable
+If you have two Iterables which you want to treat as a single one, you can use the `chain` method to *chain* one Iterable
 to the other, giving a single Iterable:
 
 {% highlight ceylon %}
 value a = [1, 2, 3];
 value b = [10, 11];
-assert(a.chain(b).sequence == [1, 2, 3, 10, 11]);
+value ab = a.chain(b);
+assert(ab.sequence == [1, 2, 3, 10, 11]);
 {% endhighlight %}
 
 > Notice that in the example above, the chain method returns an Iterable which is converted to a Sequence, using the `sequence`
@@ -755,12 +756,12 @@ A basic use of `while` would be to allow the user to run a program again and aga
 
 {% highlight ceylon %}
 String askUser(String question) {
-	process.write(question);
-	return process.readLine();
+    process.write(question);
+    return process.readLine();
 }
 
 while(askUser("Do you want to continue?").lowercased in ["y", "yes"]) {
-	// continue program
+    // continue program
 }
 {% endhighlight %}
 
@@ -777,6 +778,7 @@ void printStrings(String+ strings) {
 }
 
 printStrings("Apple", "Orange", "Pineapple");
+printStrings("Hi");
 
 // does not compile, must provide at least one String
 printStrings();
@@ -818,51 +820,51 @@ even better!
 
 {% highlight ceylon %}
 String askUser(String question) {
-	process.write(question);
-	return process.readLine();
+    process.write(question);
+    return process.readLine();
 }
 
 Float? askUserForNumber(String question) => parseFloat(askUser(question));
 
 {Float*} askUserForNumbers(String question, {Float*} previousAnswers) {
-	value answer = askUserForNumber(question);
-	if (exists answer) {
-		return askUserForNumbers(question, previousAnswers.chain { answer });
-	} else {
-		return previousAnswers;
-	}
+    value answer = askUserForNumber(question);
+    if (exists answer) {
+        return askUserForNumbers(question, previousAnswers.chain { answer });
+    } else {
+        return previousAnswers;
+    }
 }
 
 void runMathsProgram() {
-	function multiplyAll(Float* numbers) =>
-			numbers.fold(1.0, (Float x, Float y) => x * y);
-	function addAll(Float* numbers) =>
-			numbers.fold(0.0, (Float x, Float y) => x + y);
-	void printResult(Float(Float*) operation, Float* numbers) =>
-		print("Result: ``operation(*numbers)``");
-	
-	value multiplication = 0;
-	value addition = 1;
-	
-	value option = askUserForNumber("Enter: * ``multiplication`` for multiplication,
-	                                        * ``addition`` for addition: ");
-	if (exists option, option == multiplication || option == addition) {
-		value numbers = askUserForNumbers("Enter a number (or just Enter to continue): ", {});
-		printResult(option == multiplication then multiplyAll else addAll, *numbers);
-	} else {
-		print("Invalid option");
-	}
+    function multiplyAll(Float* numbers) =>
+        numbers.fold(1.0, (Float x, Float y) => x * y);
+    function addAll(Float* numbers) =>
+        numbers.fold(0.0, (Float x, Float y) => x + y);
+    void printResult(Float(Float*) operation, Float* numbers) =>
+        print("Result: ``operation(*numbers)``");
+
+    value multiplication = 0;
+    value addition = 1;
+
+    value option = askUserForNumber("Enter: * ``multiplication`` for multiplication,
+                                            * ``addition`` for addition: ");
+    if (exists option, option == multiplication || option == addition) {
+        value numbers = askUserForNumbers("Enter a number (or just Enter to continue): ", {});
+        printResult(option == multiplication then multiplyAll else addAll, *numbers);
+    } else {
+        print("Invalid option");
+    }
 }
 
 "Run the Maths helper program."
 shared void run() {
-	value stars = "*".repeat(10);
-	print(stars + " Welcome to the Maths helper " + stars);
-	runMathsProgram();
-	while(askUser("Do you want to start again? [yes/no]: ").lowercased in ["y", "yes"]) {
-		runMathsProgram();
-	}
-	print("Bye!");
+    value stars = "*".repeat(10);
+    print(stars + " Welcome to the Maths helper " + stars);
+    runMathsProgram();
+    while(askUser("Do you want to start again? [yes/no]: ").lowercased in ["y", "yes"]) {
+        runMathsProgram();
+    }
+    print("Bye!");
 }
 {% endhighlight %}
 
