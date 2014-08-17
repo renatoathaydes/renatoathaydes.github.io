@@ -916,8 +916,8 @@ There's lots of people there who will be really happy to help. No question is a 
 All of us who write code probably had the same troubles you're likely to get into, so we know exactly
 how it feels and best of all, how to get over them!
 
-That's it for now! Let me know that you enjoyed this tutorial by *starring* this repo! The more stars I get, the more
-motivation I will have to keep writing and covering the more advanced (and fun) features of Ceylon.
+That's it for now! Let me know that you enjoyed this tutorial by *starring* [this repo](https://github.com/renatoathaydes/renatoathaydes.github.io)!
+The more stars I get, the more motivation I will have to keep writing and covering the more advanced (and fun) features of Ceylon.
 
 Happy coding!
 
