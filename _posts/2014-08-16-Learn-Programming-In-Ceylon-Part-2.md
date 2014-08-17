@@ -1,3 +1,9 @@
+---
+layout: post
+title: Learn Programming in Ceylon - Part 2
+---
+
+
 ## Under construction!
 
 Will update this soon! Currently this is not done at all!
@@ -339,10 +345,11 @@ defines `plus`, or `+`), `Numeric` (which defines `minus`, `divided` and `times`
 
 Anyone could write a type that satisfies `Summable` to be able to use the `+` operator to sum two instances of that type.
 
-As an example, we can make a Summable Iterable so that we can *add* two Iterables:
+As an example, we can make a Summable kind of Iterable so that we can *add* two Iterables:
  
-> Notice that in Ceylon, you cannot add two Iterables with the `+` operator. The reason for that is that doing that would
-  likely break the contract of `Summable` that the `+` operation should be associative.
+> Notice that in Ceylon, you cannot add two Iterables with the `+` operator. The reason why Ceylon seemingly lacks this
+  functionality is that implementing `plus` for a generic Iterable would likely break the contract of `Summable`
+  that requires that the `+` operation be associative.
   For example, { 1, 2 } + { 3 } would have to be the same as { 3 } + { 1, 2 }. In the definition of `MyList` below, we
   get around that fact by adding the constraints that `MyList` contains only `Integer`s and is always sorted, so that 
   `MyList { 1, 2 } + MyList { 3 } == MyList { 3 } + MyList { 1, 2 }`.
@@ -381,18 +388,24 @@ It also shows how you can import an element and rename it to avoid name clashes 
 it would have clashed with `Iterable`'s own `sort` method inside the definition of `MyList`, causing a compiling error
 because we are not allowed to use an inherited member in the class initializer).
 
-The `in` operator maps to method `contains` of `Iterable`, so because `MyList` satisfies `Iterable`, we can use the `in`
-operator to test if a `MyList` contains a certain element:
+One important thing to notice is that when a type satisfies an interface, it **inherits** all of its default methods.
+For this reason, `MyList` gets a large number of methods pretty much for free:
 
 {% highlight ceylon %}
-assert(1 in MyList { 1, 2, 3 });
-assert(2 in MyList { 1, 2, 3 });
-assert(3 in MyList { 1, 2, 3 });
+value myList = MyList { 30, 20, 10 };
+assert(myList.size == 3);
+assert(exists first = myList.first, first == 10);
+assert(exists last = myList.last, last == 30);
+assert(exists item = myList.find((Integer elem) => elem > 10), item == 20);
+assert(myList.takingWhile((Integer elem) => elem < 15).sequence == [10]);
+assert(20 in myList);
 {% endhighlight %}
 
-> Notice that when a class satisfies an interface, it gets all of its default methods for free! That's why we can use the
-  `in` operator with `MyList`, as shown above. We could also use many more methods and properties from `Iterable`:
-  `first`, `last`, `find`, `sort`, `any`, `every`...
+The `in` operator maps to method `contains` of `Iterable`, so because `MyList` satisfies `Iterable`, we can use the `in`
+operator to test if a `MyList` contains a certain element, as shown in the last example above.
+
+If we wanted to make it possible to compare instances of `MyList` with the comparison operators (`<`, `<=`, `>`, `>=`, `<=>`),
+we would have to implement the `Comparable` interface, which requires only a single method: `compare`.
 
 If we try to compare two instances of `MyList`, we will notice that the results will not be as expected:
 
@@ -403,98 +416,217 @@ assert(MyList { 1, 2 } == MyList { 1, 2 });
 
 That's because of the way the `==` operator works. It maps to the `equals` method of the `Object` abstract class.
 
-Before we explain that in more detail, we must understand what abstract classes are.
+We will revisit the `==` operator (and also `===`, which compares *identity*) once we learn more about abstract classes,
+objects and enumerated types.
 
 ## Abstract classes
 
 Finally, the last way in which we can create a type in Ceylon is by declaring an abstract class.
 
 > An abstract class is similar to an interface, but besides having formal and default methods and properties, it can also
-have a parameter list and hold state, like concrete classes. Unlike concrete classes, but like interfaces, abstract 
-classes may not be instantiated.
+  have a parameter list and hold state, like concrete classes. Unlike concrete classes, but like interfaces, abstract 
+  classes may not be instantiated.
 
-Let's consider `MyList` again. It explicitly declares only two methods, `MyList plus(MyList other)` and
-`Iterator<Integer> iterator()`. However, because it satisfies interface `Iterable<Integer`, it **inherits** all of its
-methods, so although we can call a lot of methods on `MyList` instances:
-{% highlight ceylon %}
+A concrete class (ie. a non-abstract class) may only extend one abstract class. This restriction does not apply to
+interfaces. For this reason, it is usually preferable to use interfaces to define things unless you must hold internal
+state, which you cannot do in an interface.
 
-{% endhighlight %}
+> In this context, *state* means having one or more fields that refer to other Objects.
 
-This operator is equivalent to the `equals` method of the
-`Object` abstract class. All custom types, by default, extend the `Basic` type, which in turn, extends `Object`.
+On the other hand, abstract classes can still be very useful when there is some common functionality that can be implemented
+appropriately for most expected implementations of a concept in the same manner. This may sound like something that is
+rare to occur, but it actually happens quite often.
 
-
-TODO
-
+For example, it would probably be appropriate to introduce an abstract class for `Dealer`, in our cards game, because a
+dealer must by definition *hold state* (it needs to know who is winning and how many hands have been given, for example),
+which will mostly be handled in the same way regardless of which game is being played.
 
 # Objects and Enumerated types
 
-In the previous section, we declared a lot of classes which do not have any property, they simply exist to enumerate possible
-values of a suit or a rank.
+When we defined game cards previously, we declared a lot of classes which do not have any property, they simply exist to
+enumerate the possible values of a suit or a rank.
 
 There is a better way to enumerate values like this in Ceylon using objects.
 
-> An object is an instance
+> An object is an instance of an anonymous class. Anonymous classes and objects are analogous to anonymous functions and
+  lambdas, which we met in Part 1, but unlike lambdas, objects can be declared anywhere.
 
-
-
-
-
-
-
-
-Let's imagine we are trying to write a program to store information about cities of the world. We know that every city has
-a name. Every city has a population. Every city is located in some country. And so on. Let's pretend we only care about these
-features of cities. How can we model this in our programs?
-
-One way would be to define a type for `City`. In Ceylon, we can define a type with a `class`:
+The simplest declaration of an object is the following:
 
 {% highlight ceylon %}
-class City(shared String name,
-           shared Integer population,
-           shared String country) {}
+object someObject {}
 
-// let's create a City
-value newYork = City("New York", 8_405_837, "USA");
+object anotherObject {}
 
-// we can make it clearer what each value means by using the named-argument syntax
-value berlin = City {
-    name = "Berlin";
-    population = 4_000_000;
-    country = "Germany";
-};
+value referenceToSomeObject = someObject;
 
-assert(newYork.population > 8M);
-assert(berlin.country == "Germany");
+// like all custom types, objects extends Basic by default
+print(someObject == anotherObject); // prints false
+print(someObject == referenceToSomeObject); // prints true
 {% endhighlight %}
 
-## Polymorphism - extending existing types
+Objects are useful mostly to represent things that can only be one, ie. things that simply exist, like `4` or `a`.
+In other words, when we do not want to have several instances of this thing hanging around.
 
-Imagine that we have class `City` as defined above, but that now we decide that for certain important cities, we want to
-store much more information. Things like *tallest building*, *best restaurant*, ...
-things that just don't make sense for most cities except mega cities. Well, why not call our type `MegaCity`!? We can `extend`
-our existing type to allow that to exist in our program:
+That's the case, for example, with `Suit` and `Rank`, which we defined using classes earlier. Every time we write
+`Hearts()` or `Four()`, for example, we are creating a new instance of `Hearts` and `Four`, respectively. Besides the
+obvious waste of computer memory, this is not desirable because of the fact that `Four() == Four()`, as just one example,
+will return `false`! One can even say that's a bug in our current implementation!
+
+Armed with our knowledge about objects and interfaces, we can now refactor our definition of `Rank` to make use of them:
 
 {% highlight ceylon %}
-
+interface Suit {}
+object spades satisfies Suit {}
+object diamonds satisfies Suit {}
+object hearts satisfies Suit {}
+object clubs satisfies Suit {}
 {% endhighlight %}
 
-
-## Enumerated types
-
-In the previous example, `alias` was a really nice way to solve the problem. But it may not work in some occasions where
-the types we want to alias are not so simple.
-
-As an example, let's suppose that in our game, we need to be able show some information about the cards to help beginners.
-
-This wouldn't work so well with the code shown above. If we try to print a card, say `aceOfSpades`, this is what we would get:
-
-<code>helloCeylon.Card@2111fce</code>
-
-Not nice! This is the default implementation of the `string` property of every user-defined type 
+This is much better! Now, if you compare the objects, you get the expected answers:
 
 {% highlight ceylon %}
-
+print(spades == spades); // prints true
 {% endhighlight %}
 
+We can say that we have come a long way towards representing game cards in Ceylon in just the best possible way.
+
+But...
+
+You probably guessed, there's still a couple of issues with our definition!
+
+First of all, anyone could break our game by carelessly defining a new type of `Suit`:
+
+{% highlight ceylon %}
+"Non-existing Suit"
+object golds satisfies Suit {}
+{% endhighlight %}
+
+This makes it clear that we did not really enumerate ALL possible Suits in our definition. This has some other implications
+we'll see later with the `switch` statement.
+
+The thing is that it would be really, really nice if we could ensure that there's only 4 types os Suits, the 4 types that
+we defined: spades, diamonds, hearts and clubs. No golds!
+
+The second issue we still have to fix is that if you print one of our objects, `spades`, as an example, you will get
+something similar to this:
+
+```
+helloCeylon.spades_@7265d075
+```
+
+That's not cool. When you print something, you should expect to some helpful information to show to the user, or just to
+use for debugging your code to make sure it's doing what you think it should.
+
+Can we fix these problems? Sure we can!
+
+For the first problem, we can use the `of` keyword to let Ceylon know what instances of our type can exist. In other
+words, to enumerate the possible values of something.
+
+For the printing issue, there's a simple solution: overwrite the `string` property (which is defined in `Object`) for
+each of our objects.
+
+That's the secret of `print`: it knows how to print any `Object` because every `Object` has the `string` property.
+
+Putting the two solutions together, we get this beautiful definition of a `Suit`:
+
+{% highlight ceylon %}
+interface Suit of spades | diamonds | hearts | clubs {}
+object spades satisfies Suit { string => "spades"; }
+object diamonds satisfies Suit { string => "diamonds"; }
+object hearts satisfies Suit { string => "hearts"; }
+object clubs satisfies Suit { string => "clubs"; }
+{% endhighlight %}
+
+Because we enumerated the possible values of `Suit`, it is just impossible to define any other `Suit`. You can't even
+create a class to satisfy `Suit`. Ceylon won't let you! Your class would have to be enumerated after `of` for it to be
+allowed.
+
+Notice that this *trick* works for abstract classes and classes as well, not only interfaces and objects:
+
+{% highlight ceylon %}
+abstract class A() of B | C {}
+class B() extends A() {}
+class C() extends A() {}
+{% endhighlight %}
+
+## The `switch` statement
+
+Ceylon has one more important statement which we haven't seen yet: the `switch`.
+
+The `switch` statement allows you to select which branch to execute depending on which case is satisfied:
+
+{% highlight ceylon %}
+Boolean condition = 4 > 2;
+switch(condition)
+case(true) {
+    print("Condition is true");
+}
+case (false) {
+    print("Condition is false");
+}
+{% endhighlight %}
+
+The cases of a switch must be exhaustive, so it is impossible to forget to cover some case. If it is not possible to
+enumerate all cases (because the type of the variable used in the switch has infinite values, for example), you can
+add an `else` clause:
+
+{% highlight ceylon %}
+switch("abc")
+case("a") {
+    print("Case a");
+}
+case ("b") {
+    print("Case b");
+}
+else {
+    print("dunno");
+}
+{% endhighlight %}
+
+Switches are very clever and can almost always figure out if you have covered all possible cases. Two very common use-cases
+for switches are to narrow the type of a value and to find out which of the enumerated types a value might have:
+
+{% highlight ceylon %}
+void show(Integer|Float|Boolean|String item) {
+    switch(item)
+    case (is Integer) {
+        // here item has type Integer
+        print("Integer ``item + 0``");
+    }
+    case (is Float) {
+        print("Float ``item``");
+    }
+    case (is Boolean) {
+        print("Boolean ``item``");
+    }
+    case (is String) {
+        print("String ``item``");
+    }
+}
+
+String suitOf(Card card) {
+    switch(card.suit)
+    case (clubs) {
+        return "Clubs";
+    }
+    case (hearts) {
+        return "Hearts";
+    }
+    case (diamonds) {
+        return "Diamonds";
+    }
+    case (spades) {
+        return "Spades";
+    }
+}
+{% endhighlight %}
+
+
+## Ceylon type hierarchy
+
+All custom types, by default, extend the `Basic` type. `Basic` is an abstract class which extends `Object` (another abstract
+class) and satisfies the `Identifiable` interface.
+
+For a detailed explanation of the Ceylon type system, check the Ceylon Specification - [Chapter 3](http://ceylon-lang.org/documentation/1.0/spec/html/typesystem.html).
 
