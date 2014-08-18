@@ -627,7 +627,7 @@ The operator `nonempty` may be used to narrow the type of a list from [Element*]
 
 {% highlight ceylon %}
 [Integer*] sequence = [1, 2];
-if (nonempty s) {
+if (nonempty sequence) {
     // this would not compile outside the if block as sequence.first could be null
     print("First element is ``sequence.first``");
 }
