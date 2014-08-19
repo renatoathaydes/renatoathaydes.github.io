@@ -113,20 +113,36 @@ To install the Ceylon plugin into Eclipse, follow these steps:
 
 6. Click on OK to restart Eclipse.
 
-If everything went ok, you should now see a nice elephant (the Ceylon mascot) next to a `Ceylon IDE` button. Click on this button and then on the `New Project` link. Give your project any name you want and follow the prompts.
+If everything went ok, you should now see a nice elephant (the Ceylon mascot below. His name is *Trompon*!)
+next to the `Ceylon IDE` button.
+
+Click on this button and then on the `New Project` link. Give your project any name you want and follow the prompts.
+
+![Trompon, the elephant](images/ceylon_homebanner_elephant.png)
 
 And that's it! We're ready to start coding in Ceylon!
 
 ## Creating a Ceylon module
 
-To create a program using Ceylon, we must create a module, which is the top-level unit of any Ceylon library or application.
+To create a program using Ceylon, we must first create a Ceylon module. A module is the unit where all your program's
+source files (where you will write your code) and other resources (such as images and configuration files) will be
+placed. A module can *import*, or use, other modules.
 
-Click on `File`, select `New` and then `Ceylon Module`. Enter a module name, such as `helloCeylon`, and click on `Finish`.
+Some modules are written just to be used by other modules (ie. they
+can't be used by non-programmers by themselves). They are called *libraries*. Other modules are intended to provide
+some functionality to general users (these often use many libraries). These are called *applications* (more recently
+people have shortened that to just *apps*, which sounds cooler, I guess). Here, we refer to both libraries and apps as
+*programs*, which is more of a generic word.
+
+To create a module using the IDE, click on `File`, select `New` and then `Ceylon Module`.
+Enter a module name, such as `helloCeylon`, and click on `Finish`.
 
 > Notice that Ceylon Module names can only contain alpha-numeric characters (and `_`) and must not start with a number or capital-letter.
- The same limitation applies to function and variable names (soon you will see what these words mean).
+ The same limitation applies to function and value names (soon you will see what these words mean).
  Also notice that every Ceylon module has a version! This is an awesome feature that Ceylon, unlike most languages,
- has built into the language itself and which makes Ceylon code highly modular, but that's a little bit of an advanced topic for now!
+ has built into the language itself and which makes Ceylon code highly modular. A module may use a library A with one version
+ and another library which uses that same library A with a different version without conflict (no classpath hell in Ceylon).
+ But that's a little bit of an advanced topic for now!
 
 You should now have a project with the following contents:
 
@@ -144,6 +160,19 @@ The module descriptor can be used to document the module's functionality, its ve
 module helloCeylon "1.0.0" {
     // import other modules here
 }
+{% endhighlight %}
+
+> Notice that you may write single line comments (any text whatsoever) after `//`. Anything after `//` is regarded as
+  a comment, so it is not regarded as code by the compiler.
+  The code snippet above contains a comment (*import other modules here*).
+  Multi-line comments can be made between `/*` and `*/`. Below is an example of a multi-line comment:
+  
+{% highlight ceylon %}
+/* This is a multi-line comment
+
+   anything written here will not be regarded as code and will not be executed!
+
+*/
 {% endhighlight %}
 
 
@@ -403,7 +432,7 @@ The following keywords can also be part of a boolean expression (don't worry if 
 they will be explained shortly):
 
 * `exists`   - checks something is not `null`
-* `nonempty` - checks an Iterable is contains at least one element
+* `nonempty` - checks an Iterable contains at least one element
 * `in`       - checks an element is present in an Iterable
 * `is`       - checks a value is an instance of some type
 
