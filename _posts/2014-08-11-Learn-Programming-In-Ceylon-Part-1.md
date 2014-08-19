@@ -162,10 +162,11 @@ module helloCeylon "1.0.0" {
 }
 {% endhighlight %}
 
-> Notice that you may write single line comments (any text whatsoever) after `//`. Anything after `//` is regarded as
-  a comment, so it is not regarded as code by the compiler.
-  The code snippet above contains a comment (*import other modules here*).
-  Multi-line comments can be made between `/*` and `*/`. Below is an example of a multi-line comment:
+You may write single line comments (any text whatsoever) after `//`. Anything after `//` is regarded as
+a comment, so it is not regarded as code by the compiler.
+The code snippet above contains a comment (*import other modules here*).
+
+Multi-line comments can be made between `/*` and `*/`. Below is an example of a multi-line comment:
   
 {% highlight ceylon %}
 /* This is a multi-line comment
@@ -173,8 +174,27 @@ module helloCeylon "1.0.0" {
    anything written here will not be regarded as code and will not be executed!
 
 */
+value notComment = true;
 {% endhighlight %}
 
+The text between double-quotes (*This is our first Ceylon module*) just above the module declaration is similar to a
+comment, but is used by Ceylon tools to provide documentation for program elements (in this case, the module itself).
+You can use [mark-down](http://daringfireball.net/projects/markdown/syntax) syntax to format text in these blocks.
+
+Try changing the contents of *module.ceylon* to the text shown below, save the file then hover with the mouse over the module name!
+
+{% highlight ceylon %}
+"This is our first **Ceylon module**!
+
+ ## A Header
+ * item 1
+ * item 2
+
+ ## Other Header
+
+ Ceylon is really cool!"
+module helloCeylon "1.0.0" {}
+{% endhighlight %}
 
 A module can have one or more packages. Each package can contain several elements such as functions, classes, objects
 and interfaces (we will look at each one of them in detail later on).
