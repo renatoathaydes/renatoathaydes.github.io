@@ -118,7 +118,7 @@ next to the `Ceylon IDE` button.
 
 Click on this button and then on the `New Project` link. Give your project any name you want and follow the prompts.
 
-![Trompon, the elephant](images/ceylon_homebanner_elephant.png)
+![Trompon, the elephant](/images/ceylon_homebanner_elephant.png)
 
 And that's it! We're ready to start coding in Ceylon!
 
