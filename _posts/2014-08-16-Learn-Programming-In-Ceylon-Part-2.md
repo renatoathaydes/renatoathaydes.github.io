@@ -11,7 +11,7 @@ Will update this soon! Currently this is not done at all!
 ## Introduction
 
 In [Part 1](http://renatoathaydes.github.io/Learn-Programming-In-Ceylon-Part-1) of this series, we had a look at quite a
-lot of programming concepts! We saw how to get started with Ceylon and its IDE, what types (`String`, `Boolean` etc) and values
+lot of concepts! We saw how to get started with Ceylon and its IDE, what types (`String`, `Boolean` etc) and values
 (`"Hello"`, `true`) are, functions (`function add(Float x, Float y) => x * y`), lists (Sequences and Tuples: `[1, 2, 3]`,
 Iterables: `{'a', 'b', 'c'}`), loops (`for` and `while`), conditionals (`if` `then` `else`), comprehensions
 (`{ for (a in as) a.something }`), and finally, variadic parameters (`function takeManyStrings(String* strings) => ...`).
@@ -330,6 +330,9 @@ value hand = dealer.dealHand(pack);
 
 For this reason, before we can run our program, we will have to provide at least one implementation for `Dealer`.
 
+> See the Ceylon Language Specification's chapter on [interfaces](http://ceylon-lang.org/documentation/1.0/spec/html/declarations.html#interfaces)
+  for the full story.
+
 ### Benefiting from syntax-sugar for operators
 
 Ceylon provides some *syntax sugar* to make code more readable through the use of certain interfaces.
@@ -343,56 +346,60 @@ The only reason why that is possible is because `Integer` satisfies the interfac
 defines `plus`, or `+`), `Numeric` (which defines `minus`, `divided` and `times`, or `-`, `/` and `*`) and `Integral`
 (which defines `remainder`, or `%`).
 
-Anyone could write a type that satisfies `Summable` to be able to use the `+` operator to sum two instances of that type.
+> Summable is a parameterized type, which means that it always appears in the form Summable<Element>, where `Element` is 
+  a type parameter - it can be replaced with any type... or at least some allowed types, as we will see later.
+
+Anyone could write a type that satisfies `Summable`, to pick one of the interfaces mentioned above, to be able to use
+the `+` operator to add together two instances of that type.
 
 As an example, we can make a Summable kind of Iterable so that we can *add* two Iterables:
  
 > Notice that in Ceylon, you cannot add two Iterables with the `+` operator. The reason why Ceylon seemingly lacks this
   functionality is that implementing `plus` for a generic Iterable would likely break the contract of `Summable`
   that requires that the `+` operation be associative.
-  For example, { 1, 2 } + { 3 } would have to be the same as { 3 } + { 1, 2 }. In the definition of `MyList` below, we
-  get around that fact by adding the constraints that `MyList` contains only `Integer`s and is always sorted, so that 
-  `MyList { 1, 2 } + MyList { 3 } == MyList { 3 } + MyList { 1, 2 }`.
+  For example, { 1, 2 } + { 3 } would have to be the same as { 3 } + { 1, 2 }. In the definition of `SummableList` below, we
+  get around that fact by adding the constraints that `SummableList` contains only `Integer`s and is always sorted, so that 
+  `SummableList { 1, 2 } + SummableList { 3 } == SummableList { 3 } + SummableList { 1, 2 }`.
 
 {% highlight ceylon %}
-// necessary renaming to avoid clash with Iterable.sort in MyList
+// necessary renaming to avoid clash with Iterable.sort in SummableList
 import ceylon.language { doSort = sort }
 
 "An always sorted Iterable containing Integers that can be summed."
-class MyList({Integer*} integers) satisfies Summable<MyList> & Iterable<Integer> {
+class SummableList({Integer*} integers) satisfies Summable<SummableList> & Iterable<Integer> {
     
     {Integer*} _integers = doSort(integers);
     
-    shared actual MyList plus(MyList other) =>
-            MyList(this._integers.chain(other._integers));
+    shared actual SummableList plus(SummableList other) =>
+            SummableList(this._integers.chain(other._integers));
     
     shared actual Iterator<Integer> iterator() => _integers.iterator();
     
 }
 
-MyList result = MyList { 1, 2 } + MyList { 3 };
+SummableList result = SummableList { 1, 2 } + SummableList { 3 };
 assert(result.sequence == [1, 2, 3]);
 {% endhighlight %}
 
 The example above, incidentally, shows how a class can declare that it satisfies an interface, or, in this case, two
 interfaces.
 
-> A class may declare that it satisfies more than one interface by using the `&` symbol between each interface.
+> A class may declare that it satisfies more than one interface by using the `&` symbol between each interface name.
   What this symbol does is similar to what `|` does for union types, but results in an intersection type. Intersection
   types and union types are analogous to sets in set theory. If you look at a type as a set of properties and methods,
   then an union of the two types is the sum of all properties and methods of the two types. The intersection
   of two types is the set of properties and methods which are common to both types. That is why, in the example above,
-  an instance of `MyList`, which satisfies types `Summable<MyList>` and `Iterable<Integer>` can be assigned to either type.
+  an instance of `SummableList`, which satisfies types `Summable<SummableList>` and `Iterable<Integer>` can be assigned to either type.
 
 It also shows how you can import an element and rename it to avoid name clashes (if we didn't rename `sort` to `doSort`,
-it would have clashed with `Iterable`'s own `sort` method inside the definition of `MyList`, causing a compiling error
+it would have clashed with `Iterable`'s own `sort` method inside the definition of `SummableList`, causing a compiling error
 because we are not allowed to use an inherited member in the class initializer).
 
 One important thing to notice is that when a type satisfies an interface, it **inherits** all of its default methods.
-For this reason, `MyList` gets a large number of methods pretty much for free:
+For this reason, `SummableList` gets a large number of methods pretty much for free:
 
 {% highlight ceylon %}
-value myList = MyList { 30, 20, 10 };
+value myList = SummableList { 30, 20, 10 };
 assert(myList.size == 3);
 assert(exists first = myList.first, first == 10);
 assert(exists last = myList.last, last == 30);
@@ -401,17 +408,17 @@ assert(myList.takingWhile((Integer elem) => elem < 15).sequence == [10]);
 assert(20 in myList);
 {% endhighlight %}
 
-The `in` operator maps to method `contains` of `Iterable`, so because `MyList` satisfies `Iterable`, we can use the `in`
-operator to test if a `MyList` contains a certain element, as shown in the last example above.
+The `in` operator maps to method `contains` of `Iterable`, so because `SummableList` satisfies `Iterable`, we can use the `in`
+operator to test if a `SummableList` contains a certain element, as shown in the last example above.
 
-If we wanted to make it possible to compare instances of `MyList` with the comparison operators (`<`, `<=`, `>`, `>=`, `<=>`),
+If we wanted to make it possible to compare instances of `SummableList` with the comparison operators (`<`, `<=`, `>`, `>=`, `<=>`),
 we would have to implement the `Comparable` interface, which requires only a single method: `compare`.
 
-If we try to compare two instances of `MyList`, we will notice that the results will not be as expected:
+If we try to compare two instances of `SummableList`, we will notice that the results will not be as expected:
 
 {% highlight ceylon %}
 // this assertion fails
-assert(MyList { 1, 2 } == MyList { 1, 2 });
+assert(SummableList { 1, 2 } == SummableList { 1, 2 });
 {% endhighlight %}
 
 That's because of the way the `==` operator works. It maps to the `equals` method of the `Object` abstract class.
@@ -435,7 +442,7 @@ state, which you cannot do in an interface.
 
 On the other hand, abstract classes can still be very useful when there is some common functionality that can be implemented
 appropriately for most expected implementations of a concept in the same manner. This may sound like something that is
-rare to occur, but it actually happens quite often.
+rare in practice, but it actually happens quite often.
 
 For example, it would probably be appropriate to introduce an abstract class for `Dealer`, in our cards game, because a
 dealer must by definition *hold state* (it needs to know who is winning and how many hands have been given, for example),
@@ -451,7 +458,7 @@ There is a better way to enumerate values like this in Ceylon using objects.
 > An object is an instance of an anonymous class. Anonymous classes and objects are analogous to anonymous functions and
   lambdas, which we met in Part 1, but unlike lambdas, objects can be declared anywhere.
 
-The simplest declaration of an object is the following:
+The following example shows the creation of some objects in their simplest form:
 
 {% highlight ceylon %}
 object someObject {}
@@ -465,11 +472,13 @@ print(someObject == anotherObject); // prints false
 print(someObject == referenceToSomeObject); // prints true
 {% endhighlight %}
 
-Objects are useful mostly to represent things that can only be one, ie. things that simply exist, like `4` or `a`.
-In other words, when we do not want to have several instances of this thing hanging around.
+Objects are useful, mostly, to represent things that can only be one... things that simply exist, like `4` or `a`, that
+don't make sense to be created more than once.
+
+In other words, we use objects when we do not want to have several instances of this thing hanging around.
 
 That's the case, for example, with `Suit` and `Rank`, which we defined using classes earlier. Every time we write
-`Hearts()` or `Four()`, for example, we are creating a new instance of `Hearts` and `Four`, respectively. Besides the
+`Hearts()` or `Four()` we are creating a new instance of `Hearts` and `Four`, respectively. Besides the
 obvious waste of computer memory, this is not desirable because of the fact that `Four() == Four()`, as just one example,
 will return `false`! One can even say that's a bug in our current implementation!
 
@@ -505,7 +514,7 @@ object golds satisfies Suit {}
 This makes it clear that we did not really enumerate ALL possible Suits in our definition. This has some other implications
 we'll see later with the `switch` statement.
 
-The thing is that it would be really, really nice if we could ensure that there's only 4 types os Suits, the 4 types that
+The thing is that it would be really, really nice if we could ensure that there's only 4 types of Suits, the 4 types that
 we defined: spades, diamonds, hearts and clubs. No golds!
 
 The second issue we still have to fix is that if you print one of our objects, `spades`, as an example, you will get
@@ -515,8 +524,8 @@ something similar to this:
 helloCeylon.spades_@7265d075
 ```
 
-That's not cool. When you print something, you should expect to some helpful information to show to the user, or just to
-use for debugging your code to make sure it's doing what you think it should.
+That's not cool. When you print something, you should show some helpful information to the user (or the programmer
+debugging the code later).
 
 Can we fix these problems? Sure we can!
 
@@ -538,17 +547,40 @@ object hearts satisfies Suit { string => "hearts"; }
 object clubs satisfies Suit { string => "clubs"; }
 {% endhighlight %}
 
-Because we enumerated the possible values of `Suit`, it is just impossible to define any other `Suit`. You can't even
-create a class to satisfy `Suit`. Ceylon won't let you! Your class would have to be enumerated after `of` for it to be
-allowed.
+> The syntax `string => "something";` is new. This is short notation for `shared actual String string => "something";`.
+  Although Ceylon aims at making code readable and mostly explicit, it makes an exception in the case of overriding
+  formal methods or properties because this is such a common case. Also, once you get a little bit used to this short notation,
+  you immediately recognize it and, arguably, can read the code even more easily than you would otherwise. 
 
-Notice that this *trick* works for abstract classes and classes as well, not only interfaces and objects:
+Because we enumerated the possible values of `Suit`, it is just impossible to define any other `Suit` elsewhere.
+You can't even create a class to satisfy `Suit`. Ceylon won't let you! Your class would have to be enumerated after `of`
+for it to be allowed.
+
+Notice that this *trick* works for abstract classes and classes as well, not only interfaces and objects
+(but the enumerated type itself must be an abstract class or interface):
 
 {% highlight ceylon %}
 abstract class A() of B | C {}
 class B() extends A() {}
 class C() extends A() {}
 {% endhighlight %}
+
+By the way, the `Boolean` type itself is defined as an enumerated type:
+
+{% highlight ceylon %}
+shared abstract class Boolean() 
+        of true | false {}
+
+shared object true extends Boolean() {
+    string => "true";
+}
+
+shared object false extends Boolean() {
+    string => "false";
+}
+{% endhighlight %}
+
+Even `null` is just the single enumerated value of the type `Null`.
 
 ## The `switch` statement
 
@@ -567,9 +599,10 @@ case (false) {
 }
 {% endhighlight %}
 
-The cases of a switch must be exhaustive, so it is impossible to forget to cover some case. If it is not possible to
-enumerate all cases (because the type of the variable used in the switch has infinite values, for example), you can
-add an `else` clause:
+The cases of a switch must be exhaustive, so it is impossible to forget to cover some case (the compiler makes sure of that).
+
+If it is not possible to enumerate all cases (because the type of the variable used in the switch has infinite values,
+for example), you can add an `else` clause:
 
 {% highlight ceylon %}
 switch("abc")
@@ -584,7 +617,7 @@ else {
 }
 {% endhighlight %}
 
-Switches are very clever and can almost always figure out if you have covered all possible cases. Two very common use-cases
+Switches are very clever and can always figure out if you have covered all possible cases. Two very common use-cases
 for switches are to narrow the type of a value and to find out which of the enumerated types a value might have:
 
 {% highlight ceylon %}
@@ -619,14 +652,121 @@ String suitOf(Card card) {
     case (spades) {
         return "Spades";
     }
+    // no other case is possible, so you don't need a return here
 }
 {% endhighlight %}
 
 
-## Ceylon type hierarchy
+## Polymorphism
 
-All custom types, by default, extend the `Basic` type. `Basic` is an abstract class which extends `Object` (another abstract
-class) and satisfies the `Identifiable` interface.
+Polymorphism is one of the most powerful concepts in programming. You may read a formal definition of polymorphism on
+[Wikipedia](http://en.wikipedia.org/wiki/Polymorphism_\(computer_science\)) if you are interested, but in this tutorial
+we'll concern ourselves only with the practical uses of polymorphism.
+
+The idea is really simple: you should be able to manipulate different things in the same way if they can be seen as being
+conceptually the same, even if only in certain contexts.
+ 
+In practice, this means one of two things in Ceylon: sub-typing and generics.
+
+### Sub-typing
+
+We have already met sub-typing a few times. Every time we satisfy an interface `A` in a class `B`, `B` becomes a sub-type
+of `A`. It works the same way when a class `X` extends class `Y`: `X` becomes a sub-type of `Y` (and `Y` a super-type
+of `X`).
+
+Most of the time, a sub-type can be seen, and treated, in the exact same way as its super-type(s). This becomes obvious
+when you consider that a sub-type inherits all the behavior of its super-type(s).
+
+Let's look at a concrete example. We mentioned earlier that all custom types, by default, extend `Basic`.
+
+Effectively, writing `class A() {}` is equivalent to writing `class A() extends Basic() {}`.
+
+> You can open any type declaration in the IDE by hitting Ctrl+Shit+T and entering the name of a type.
+  Have a look at the definitions of `Basic` and `Object`! With a type opened, hit Ctrl+T to see the type hierarchy.
+
+
+![Ceylon type hierarchy](/images/ceylon_type_hierarchy.png)
+
+
+`Basic` does not define any property or method, but it extends `Object` and satisfies `Identifiable`.
+
+`Object` has one formal method, `equals`, one formal property, `hash`, and provides a default implementation of `string`:
+
+{% highlight ceylon %}
+shared formal Boolean equals(Object that);
+
+shared formal Integer hash;
+    
+shared default String string =>
+        className(this) + "@" + hash.string;
+{% endhighlight %}
+
+The reason why custom types are not required to provide implementation for anything is that `Identifiable`, which is
+satisfied by `Basic`, provides default implementations for both `equals` and `hash`. This is really convenient, because
+`equals`, as we already saw, maps to the `==` operator, so that you can use the `==` operator with any custom type.
+
+The `===` operator (notice it's 3 `=`) is used to determine if two values are references to the same instance.
+It can be used with any type that satisfies `Identifiable`, and the default implementation of `equals` just delegates
+to `===`:
+
+{% highlight ceylon %}
+shared default actual Boolean equals(Object that) {
+    if (is Identifiable that) {
+        return this === that;
+    }
+    else {
+        return false;
+    }
+}
+{% endhighlight %}
+
+Now it should be obvious why we had an unexpected result when we tried to use the `==` operator to compare two instances
+of `SummableList` earlier on!
+
+It is important to understand that just because you don't need to implement `equals`, it doesn't mean that you shouldn't!
+In fact, you are encouraged to implement it for most types.
+
+Just for completeness, let's finally fix `SummableList` and make sure it respects the contract of `Summable`:
+
+{% highlight ceylon %}
+class SummableList({Integer*} integers) satisfies Summable<SummableList> & Iterable<Integer> {
+    
+    {Integer*} _integers = doSort(integers);
+    
+    plus(SummableList other) => SummableList(this._integers.chain(other._integers));
+    
+    iterator() => _integers.iterator();
+    
+    hash => _integers.hash;
+    
+    shared actual Boolean equals(Object other) {
+        if (is SummableList other) {
+            return this.sequence == other.sequence;
+        } else {
+            return false;
+        }
+    }
+    
+}
+{% endhighlight %}
+
+> Besides implementing `equals`, notice that we also implemented `hash`. That's because, to respect the contract of
+  `Object`, which states that *if `x == y` then `x.hash == y.hash`*, when you implement `equals` you must always
+  implement `hash` as well. This is particularly important if your type may be added to a `HashSet` or a `HashMap`.
+
+### Generics
+
+You may not know it, but you have already seen generic types before! In fact, all list types we saw before are generic:
+they may contain items of any type (actually, the types may be bounded, as we'll see).
+
+{% highlight ceylon %}
+Sequence<Integer> list1 = [1, 2, 3];
+Iterable<String|Boolean> list2 = {"Hi", true, false, "Bye"};
+
+{% endhighlight %}
+
+
+TODO
 
 For a detailed explanation of the Ceylon type system, check the Ceylon Specification - [Chapter 3](http://ceylon-lang.org/documentation/1.0/spec/html/typesystem.html).
 
