@@ -750,19 +750,54 @@ class SummableList({Integer*} integers) satisfies Summable<SummableList> & Itera
 }
 {% endhighlight %}
 
-> Besides implementing `equals`, notice that we also implemented `hash`. That's because, to respect the contract of
-  `Object`, which states that *if `x == y` then `x.hash == y.hash`*, when you implement `equals` you must always
+> Besides implementing `equals`, notice that we also implemented `hash`. That's always a good idea because to respect
+  the contract of `Object`, which states that *if `x == y` then `x.hash == y.hash`*, when you implement `equals` you must always
   implement `hash` as well. This is particularly important if your type may be added to a `HashSet` or a `HashMap`.
 
 ### Generics
 
-You may not know it, but you have already seen generic types before! In fact, all list types we saw before are generic:
-they may contain items of any type (actually, the types may be bounded, as we'll see).
+You may not have known it, but you have already seen generic types before! In fact, all list types we saw before are
+generic, ie. they may contain items of any type (actually, the types may be bounded, as we'll see).
 
 {% highlight ceylon %}
 Sequence<Integer> list1 = [1, 2, 3];
 Iterable<String|Boolean> list2 = {"Hi", true, false, "Bye"};
+{% endhighlight %}
 
+`Sequence<Integer>` is a Sequence which can only hold Integers.
+`Iterable<String|Boolean>` is an Iterable which can only hold Strings or Booleans.
+
+To understand how generics works, let's create simple generic type that can make a value secret (or accessible only via
+a password):
+
+{% highlight ceylon %}
+class Secret<Value>(Value val, String password) {
+    shared Value? get(String pass) {
+        if (password == pass) {
+            return val;
+        } else {
+            return null;
+        }
+    }
+}
+{% endhighlight %}
+
+We can then use our Secret type as follows:
+
+{% highlight ceylon %}
+value secretInteger = Secret(42, "mypass");
+value secretWord = Secret("Ceylon", "secretKeyword");
+
+// in some other part of the program
+Integer? secret1 = secretInteger.get("wrong");
+assert(secret1 is Null);
+Integer? secret2 = secretInteger.get("mypass");
+assert(is Integer secret2, secret2 == 42);
+
+value secret3 = secretWord.get("secretKeyword");
+if (exists secret3) {
+    print("The secret word is ``secret3``");
+}
 {% endhighlight %}
 
 
