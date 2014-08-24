@@ -37,7 +37,7 @@ We already mentioned then that `Float?` is just short notation for the type `Flo
 
 This is called an **union type**.
 
-> An union type is a type formed by two or more different types. A value always has a single type, but a function may accept
+> A union type is a type formed by two or more different types. A value always has a single type, but a function may accept
 or return values of different types. That's the main reason union types exist.
 
 To try this out, you can use the following code (don't forget, this must be inside the `run` function):
@@ -56,7 +56,7 @@ print(x exists then "Thank you!" else "Sorry, that's not a number.");
 > We show above how you can use `then` ... `else` directly in a single expression... you just need something that evaluates
 to a Boolean before `then`, and an expression that evaluates to some value in case that's true and another in case that's not.
 
-Any number of types can be part of an union. Here are some examples:
+Any number of types can be part of a union. Here are some examples:
 
 {% highlight ceylon %}
 void show(String|Boolean|Integer input) {
@@ -346,7 +346,7 @@ The only reason why that is possible is because `Integer` satisfies the interfac
 defines `plus`, or `+`), `Numeric` (which defines `minus`, `divided` and `times`, or `-`, `/` and `*`) and `Integral`
 (which defines `remainder`, or `%`).
 
-> Summable is a parameterized type, which means that it always appears in the form Summable<Element>, where `Element` is 
+> Summable is a parameterized type, which means that it always appears in the form `Summable<Element>`, where `Element` is 
   a type parameter - it can be replaced with any type... or at least some allowed types, as we will see later.
 
 Anyone could write a type that satisfies `Summable`, to pick one of the interfaces mentioned above, to be able to use
@@ -387,7 +387,7 @@ interfaces.
 > A class may declare that it satisfies more than one interface by using the `&` symbol between each interface name.
   What this symbol does is similar to what `|` does for union types, but results in an intersection type. Intersection
   types and union types are analogous to sets in set theory. If you look at a type as a set of properties and methods,
-  then an union of the two types is the sum of all properties and methods of the two types. The intersection
+  then a union of the two types is the sum of all properties and methods of the two types. The intersection
   of two types is the set of properties and methods which are common to both types. That is why, in the example above,
   an instance of `SummableList`, which satisfies types `Summable<SummableList>` and `Iterable<Integer>` can be assigned to either type.
 

@@ -132,22 +132,34 @@ Some modules are written just to be used by other modules (ie. they
 can't be used by non-programmers by themselves). They are called *libraries*. Other modules are intended to provide
 some functionality to general users (these often use many libraries). These are called *applications* (more recently
 people have shortened that to just *apps*, which sounds cooler, I guess). Here, we refer to both libraries and apps as
-*programs*, which is more of a generic word.
+*programs*, which is a more generic word.
 
 To create a module using the IDE, click on `File`, select `New` and then `Ceylon Module`.
-Enter a module name, such as `helloCeylon`, and click on `Finish`.
+Enter a module name, such as `hello.ceylon`, and click on `Finish`.
 
-> Notice that Ceylon Module names can only contain alpha-numeric characters (and `_`) and must not start with a number or capital-letter.
- The same limitation applies to function and value names (soon you will see what these words mean).
- Also notice that every Ceylon module has a version! This is an awesome feature that Ceylon, unlike most languages,
- has built into the language itself and which makes Ceylon code highly modular. A module may use a library A with one version
- and another library which uses that same library A with a different version without conflict (no classpath hell in Ceylon).
- But that's a little bit of an advanced topic for now!
+A Ceylon module name, as specified in the [Ceylon Language Specification](http://ceylon-lang.org/documentation/1.0/spec/html/modulesystem.html#modulenamesandversionidentifiers),
+is a period-separated list of lowercase identifiers (you may use lower-case letters and the symbol `_` to separate words
+if necessary). You may not use any Ceylon keyword as part of your module name (we'll discuss keywords soon, but be
+warned that `module` is one of the keywords, so you cannot call a module `my.module`, for example).
+
+> Because there are lots of Ceylon modules (and my bet is that there will be a lot more soon!), it is always a good idea to
+name your modules with names that are very likely to be unique... this avoids confusion and possible name clashes.
+A good way to do that is to follow the Java tradition (to name packages) of using a reversed domain followed
+by the actual name you want to give to your module... so, in my case, if I want to create a module called `commons`,
+I would name it `com.athaydes.commons` instead (I own `athaydes.com`, but I let my brother use that so my site is on
+[renato.athaydes.com](http://renato.athaydes.com).
+
+
+> Notice that every Ceylon module has a version! This is an awesome feature that Ceylon, unlike most languages,
+has built into the language itself and which makes Ceylon code highly modular. A module may use a library A with one version
+and another library which uses that same library A with a different version without conflict (no classpath hell in Ceylon).
+But that's a little bit of an advanced topic for now!
+
 
 You should now have a project with the following contents:
 
 <code>source/</code><br/>
-<code>&nbsp;&nbsp;|--helloCeylon/</code><br/>
+<code>&nbsp;&nbsp;|--hello/ceylon/</code><br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon</code><br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon</code><br/>
 <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon</code><br/>
@@ -157,7 +169,7 @@ The module descriptor can be used to document the module's functionality, its ve
 *module.ceylon*
 {% highlight ceylon %}
 "This is our first Ceylon module!"
-module helloCeylon "1.0.0" {
+module hello.ceylon "1.0.0" {
     // import other modules here
 }
 {% endhighlight %}
@@ -193,15 +205,15 @@ Try changing the contents of *module.ceylon* to the text shown below, save the f
  ## Other Header
 
  Ceylon is really cool!"
-module helloCeylon "1.0.0" {}
+module hello.ceylon "1.0.0" {}
 {% endhighlight %}
 
 A module can have one or more packages. Each package can contain several elements such as functions, classes, objects
 and interfaces (we will look at each one of them in detail later on).
 
 Packages are directories under (and including) the module directory and must have the same name as the directory.
-In this example, our first package is called `helloCeylon`. If we create a directory under it called `myPackage`,
-this directory will be the `helloCeylon.myPackage` package.
+In this example, our first package is called `hello.ceylon`. If we create a directory under `hello/ceylon/` called
+`my_package`, this directory will be the `hello.ceylon.my_package` package.
 
 Each package may contain a package descriptor called `package.ceylon`. This file is used to document the package and to
 make it `shared`, if desired.
@@ -212,14 +224,14 @@ that import this module.
 *package.ceylon*
 {% highlight ceylon %}
 "Package for our initial program."
-shared package helloCeylon;
+shared package hello.ceylon;
 {% endhighlight %}
 
-Finally, you should also have a source file called `run.ceylon` inside the `helloCeylon` package with the following contents:
+Finally, you should also have a source file called `run.ceylon` inside the `hello.ceylon` package with the following contents:
 
 *run.ceylon*
 {% highlight ceylon %}
-"Run the module `helloCeylon`."
+"Run the module `hello.ceylon`."
 shared void run() {
 
 }
@@ -248,7 +260,7 @@ should be "visible" to elements that are located in different packages and, poss
 We can make Ceylon write something out (`print` in programmer's jargon) by changing the contents of `run.ceylon` to this:
 
 {% highlight ceylon %}
-"Run the module `helloCeylon`."
+"Run the module `hello.ceylon`."
 shared void run() {
     print("Hello World!");    
 }
@@ -318,9 +330,9 @@ This is equivalent to writing `String name = "John"`, but Ceylon already knows t
 usually don't need to tell it that (unless the value is declared at package-level, or outside any function)!
 
 `value` is a Ceylon keyword, and as such, you must not name something in your program `value`. There's quite a few reserved
-[keywords](http://ceylon-lang.org/documentation/1.0/spec/html/lexical.html#identifiersandkeywords) in Ceylon
-(which are necessary for it to be able to interpret your programs)... for example, a few of them are `void`,
-`if`, `then`, `else`, `for`, `while` and `in`, which are instructions we will get back to shortly...
+[keywords](http://ceylon-lang.org/documentation/1.0/spec/html/lexical.html#identifiersandkeywords) in Ceylon, besides
+`module` which we met earlier. Keywords are necessary for Ceylon to be able to interpret your programs... a few more
+keywords are `void`, `if`, `then`, `else`, `for`, `while` and `in`, which are instructions we will get back to shortly...
 
 > If you really must name something with a keyword, you can scape it with `\i`, for example: `value \ivalue = "Hi"`.
 
