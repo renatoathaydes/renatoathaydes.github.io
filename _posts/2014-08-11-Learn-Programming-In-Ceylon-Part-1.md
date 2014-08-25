@@ -94,7 +94,7 @@ Inside the `eclipse` folder, you will find the Eclipse executable. Double-click 
 
 Finally, you should see the Eclipse Welcome Page:
 
-![Eclipse Welcome Page](https://www.sugarsync.com/pf/D6255314_638_6794803818?directDownload=true)
+![Eclipse Welcome Page](/images/EclipseWelcome.png)
 
 The overview and tutorials Eclipse comes with are targeted mostly at Java developers, but feel free to have a look at some of it if you have some time... but if you just want to get your hands dirty with Ceylon, just ignore those and keep reading!
 
@@ -158,11 +158,12 @@ But that's a little bit of an advanced topic for now!
 
 You should now have a project with the following contents:
 
-<code>source/</code><br/>
-<code>&nbsp;&nbsp;|--hello/ceylon/</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon</code><br/>
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon</code><br/>
+<code>source/<br/>
+  &nbsp;&nbsp;|--hello/ceylon/<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--module.ceylon<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--package.ceylon<br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--run.ceylon
+</code>
 
 The module descriptor can be used to document the module's functionality, its version, and to import other modules.
 
@@ -175,7 +176,7 @@ module hello.ceylon "1.0.0" {
 {% endhighlight %}
 
 You may write single line comments (any text whatsoever) after `//`. Anything after `//` is regarded as
-a comment, so it is not regarded as code by the compiler.
+a comment, which means it is not regarded as code by the compiler.
 The code snippet above contains a comment (*import other modules here*).
 
 Multi-line comments can be made between `/*` and `*/`. Below is an example of a multi-line comment:
@@ -191,7 +192,7 @@ value notComment = true;
 
 The text between double-quotes (*This is our first Ceylon module*) just above the module declaration is similar to a
 comment, but is used by Ceylon tools to provide documentation for program elements (in this case, the module itself).
-You can use [mark-down](http://daringfireball.net/projects/markdown/syntax) syntax to format text in these blocks.
+You can use [markdown](http://daringfireball.net/projects/markdown/syntax) syntax to format text in these blocks.
 
 Try changing the contents of *module.ceylon* to the text shown below, save the file then hover with the mouse over the module name!
 
@@ -253,7 +254,7 @@ As already mentioned, `run` is the name of the function... `shared` just means t
 should be "visible" to elements that are located in different packages and, possibly, modules.
 
 `void` means that the function does not return anything back to the caller. Other functions might return things, like a
-`Number`, but let's keep it simple at first!
+`Number`, but let's keep it simple for now!
 
 ## Hello World!
 
@@ -509,6 +510,28 @@ if (!veryLargeX) {
 }
 {% endhighlight %}
 
+You can use `if` statements to initialize a value with different contents depending on a number of conditions:
+
+{% highlight ceylon %}
+value x = 10;
+
+// size could have different values
+String size;
+
+if (x > 10k) {
+    size = "Very large";
+} else if (x > 1k) {
+    size = "Quite large";
+} else {
+    size = "Smallish";
+}
+
+print("x is ``size``");
+{% endhighlight %}
+
+In cases like this, you must make sure the value is definitely initialized before attempting to use it.
+
+
 ## Working with functions
 
 We have already defined `function` as a piece of code which can be executed by either other functions or by the Ceylon
@@ -623,6 +646,43 @@ The resulting program may be a little longer than it was before, but writing cod
 If the name of the function is not enough for us to understand what it does, well, it probably has a bad name in the first place...
 but we should also look at the type signature of a function, which is made up by the types of the arguments (what we pass in)
 and the type of the return value (what we get out), when we need to find out the purpose of a function. This is valuable information!
+
+One last consideration about functions is that they can have default values for their parameters. This is useful because
+sometimes you will notice that many invocations of a certain function use the same value for one, or several, of its arguments.
+Other times it's just convenient to allow a different number of arguments to be provided.
+
+To see how that works, let's improve the `multiply` and `add` functions we defined earlier to allow callers to pass only one argument
+in, rather than demand two. The **neutral** number for multiplication is `1.0` (any `x` multiplied by `1` is just `x`),
+and the **neutral** number for addition is `0.0`, so let's use these as our defaults:
+
+{% highlight ceylon %}
+function multiply(Float a, Float b = 1.0) => a * b;
+function add(Float a, Float b = 0.0) => a + b;
+{% endhighlight %}
+
+We can now call these functions using one or two arguments:
+
+{% highlight ceylon %}
+assert(multiply(2.0) == 2.0);
+assert(multiply(2.0, 2.0) == 4.0);
+assert(add(5.0) == 5.0);
+assert(add(1.0, 1.0) == 2.0);
+{% endhighlight %}
+
+A function can have any number of optional parameters (ie. parameters with default values), including all of its parameters.
+The only limitation is that there can be no non-optional parameter after an optional one (this avoids any confusion that
+could arise matching parameters with their actual values).
+
+> An optional parameter of type `Float` has the type `Float=`. For this reason, the type of both `multiply` and `add`
+  changed from `Float(Float, Float)` to `Float(Float, Float=)` after we made the second argument optional.
+
+Are you able to modify the maths helper program using the your newly acquired knowledge of optional parameters
+to make it possible for the user to provide not only exactly 2 values, but between 1 and 3 values?
+
+Give that a try!
+
+After you're done, compare your solution with [this one](https://gist.github.com/renatoathaydes/54e50f29abad7fda2a27) and
+see what you could have done differently!
 
 ## Representing and using lists
 
