@@ -515,18 +515,18 @@ You can use `if` statements to initialize a value with different contents depend
 {% highlight ceylon %}
 value x = 10;
 
-// size could have different values
-String size;
+// description could have different values
+String description;
 
 if (x > 10k) {
-    size = "Very large";
+    description = "Very large";
 } else if (x > 1k) {
-    size = "Quite large";
+    description = "Quite large";
 } else {
-    size = "Smallish";
+    description = "Smallish";
 }
 
-print("x is ``size``");
+print("x is ``description``");
 {% endhighlight %}
 
 In cases like this, you must make sure the value is definitely initialized before attempting to use it.
