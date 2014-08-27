@@ -537,7 +537,7 @@ In cases like this, you must make sure the value is definitely initialized befor
 We have already defined `function` as a piece of code which can be executed by either other functions or by the Ceylon
 runtime.
 But what was missing from that definition is that functions are also values, which means they can be arguments to other
-functions, for example.
+functions, or be the value returned by them, for example.
 
 Check this out!
 
@@ -592,13 +592,15 @@ the idea has its roots in the [lambda calculus](http://en.wikipedia.org/wiki/Lam
 The long notation for functions is to
 use `{ ... }` to wrap all statements the function should execute (like we did for the `askUserForNumber` and `run` functions).
 
-We then defined a function called `printResult` which takes another function, called `operation`, with a type
-`Float(Float, Float)`. You might have guessed that this type corresponds to any function that takes two `Float`s as arguments
+Back to our little program above... we then defined a function called `printResult` which takes another function,
+called `operation`, with a type `Float(Float, Float)`.
+You might have guessed that this type corresponds to any function that takes two `Float`s as arguments
 and returns another `Float`. Not coincidentally, both `add` and `multiply` are examples of just such functions.
 
-A function that returns a `String` and takes only one `Float` would look like this: `String(Float)`.
+A function that returns a `String` and takes only one `Float` as an argument would be a function of type `String(Float)`.
 
-The program asks the user to enter either `0` for multiplication or `1` for addition, then asks for the values of `x` and `y`.
+The program then asks the user to enter either `0` for multiplication or `1` for addition, after which it asks for the
+values of `x` and `y`.
 
 In the next step, it `assert`s that the user entered valid values!
 
@@ -702,6 +704,14 @@ assert(sequence[2] == 3);
 // does not compile, item at index 3 does not exist!
 assert(sequence[3] == 0);
 {% endhighlight %}
+
+> If you try the example above, that does not compile, in the IDE you will notice that the code that has an error will
+  be underlined with a curly, red line. When you see that, you know you have a *compilation error*, which means
+  your program does not compile and therefore cannot be run. Hovering over the error with your mouse will give you the
+  reason why the code does not compile (in this case, it will say **"operand expression must be of type Object:
+  Null is not assignable to Object"**). These messages are usually very specific and make it easy for us to fix the error,
+  but to understand them properly you'd often need a little bit more knowledge than you have gained so far. But don't worry,
+  keep reading and soon this kind of error message will make perfect sense!
 
 In the above example, the type of `sequence` is `[Integer, Integer, Integer]`, which means a *Tuple of 3 Integers*.
 
