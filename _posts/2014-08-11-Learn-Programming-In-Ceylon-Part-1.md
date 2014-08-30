@@ -330,6 +330,8 @@ value name = "John";
 This is equivalent to writing `String name = "John"`, but Ceylon already knows that `"John"` must be a String, so you
 usually don't need to tell it that (unless the value is declared at package-level, or outside any function)!
 
+> Value identifiers are case-sensitive, so `name` and `naMe` are distinct identifiers.
+
 `value` is a Ceylon keyword, and as such, you must not name something in your program `value`. There's quite a few reserved
 [keywords](http://ceylon-lang.org/documentation/1.0/spec/html/lexical.html#identifiersandkeywords) in Ceylon, besides
 `module` which we met earlier. Keywords are necessary for Ceylon to be able to interpret your programs... a few more

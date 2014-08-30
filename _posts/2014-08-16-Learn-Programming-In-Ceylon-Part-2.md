@@ -3,11 +3,6 @@ layout: post
 title: Learn Programming in Ceylon - Part 2
 ---
 
-
-## Under construction!
-
-Will update this soon! Currently this is not done at all!
-
 ## Introduction
 
 In [Part 1](http://renatoathaydes.github.io/Learn-Programming-In-Ceylon-Part-1) of this series, we had a look at quite a
@@ -19,10 +14,11 @@ Iterables: `{'a', 'b', 'c'}`), loops (`for` and `while`), conditionals (`if` `th
 We also created a first, more or less complete program, the *Maths Helper*, that allows users to do some simple maths.
 
 In this part of the series, we will start looking at some more advanced concepts, such as union types, switches,
-custom types, Maps, Trees and polymorphism. These concepts will allow you to tackle problems with a high level of
-complexity in a manageable manner.
+custom types, enumerated types, polymorphism and generics.
 
-To start with, let's have a look at one of the most innovative features of Ceylon: union types.
+These concepts will allow you to tackle problems with a high level of complexity in a manageable manner.
+
+To get started, let's have a look at one of the most innovative features of Ceylon: union types.
 
 ## Union types
 
@@ -54,7 +50,8 @@ print(x exists then "Thank you!" else "Sorry, that's not a number.");
 {% endhighlight %}
 
 > We show above how you can use `then` ... `else` directly in a single expression... you just need something that evaluates
-to a Boolean before `then`, and an expression that evaluates to some value in case that's true and another in case that's not.
+to a Boolean before `then`, and an expression that evaluates to some value in case that's true and another in case
+that's false.
 
 Any number of types can be part of a union. Here are some examples:
 
@@ -889,7 +886,7 @@ class SummableList<Element>({Element*} elements) satisfies Summable<SummableList
 > The type `Element` above is not an actual type, it is only a type parameter which will be "replaced" with a concrete
   type when an actual instance of SummableList is created.
 
-> you can see in this code sample one of the techniques programmers often use during development: to add comments that
+> You can see in this code sample one of the techniques programmers often use during development: to add comments that
   start with `FIXME` to describe temporary solutions that need fixing later (but won't affect the development
   of other parts of the system for some time) or `TODO` for things that need to be done, but cannot be done now for
   whatever reason. These are easily searchable (in the IDE, open `Window > Show View > Tasks` to see all your TODOs) so
@@ -990,12 +987,12 @@ Just like value parameters, type parameters can be many and each can be given a 
 class TwoOrThreeThings<A, B, C = Null>(
     shared A a, shared B b, shared C c) {}
 
-// the third argument defaults to null
+// the third type parameter defaults to Null
 void printTwoThings(TwoOrThreeThings<String, Boolean> twoThings) {
     print("String is ``twoThings.a`` and Boolean is ``twoThings.b``");
 }
 
-// the third argument is bound to Integer
+// the third parameter is bound to Integer
 void printThreeThings(TwoOrThreeThings<String, Boolean, Integer> threeThings) {
     print("* String is ``threeThings.a``
            * Boolean is ``threeThings.b``
@@ -1005,3 +1002,11 @@ void printThreeThings(TwoOrThreeThings<String, Boolean, Integer> threeThings) {
 printTwoThings(TwoOrThreeThings("Hi", true, null));
 printThreeThings(TwoOrThreeThings("Hi", true, 20));
 {% endhighlight %}
+
+
+### Covariant and contravariant type parameters
+
+
+TODO
+
+
