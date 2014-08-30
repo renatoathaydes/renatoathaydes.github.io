@@ -347,7 +347,8 @@ defines `plus`, or `+`), `Numeric` (which defines `minus`, `divided` and `times`
 (which defines `remainder`, or `%`).
 
 > Summable is a parameterized type, which means that it always appears in the form `Summable<Element>`, where `Element` is 
-  a type parameter - it can be replaced with any type... or at least some allowed types, as we will see later.
+  a type parameter - it can be replaced with any type... or at least some allowed types, as we will see later when we
+  discuss **generics**.
 
 Anyone could write a type that satisfies `Summable`, to pick one of the interfaces mentioned above, to be able to use
 the `+` operator to add together two instances of that type.
@@ -754,6 +755,11 @@ class SummableList({Integer*} integers) satisfies Summable<SummableList> & Itera
   the contract of `Object`, which states that *if `x == y` then `x.hash == y.hash`*, when you implement `equals` you must always
   implement `hash` as well. This is particularly important if your type may be added to a `HashSet` or a `HashMap`.
 
+
+> For a detailed explanation of the Ceylon type system, check the Ceylon Specification -
+  [Chapter 3](http://ceylon-lang.org/documentation/1.0/spec/html/typesystem.html).
+
+
 ### Generics
 
 You may not have known it, but you have already seen generic types before! In fact, all list types we saw before are
@@ -767,41 +773,135 @@ Iterable<String|Boolean> list2 = {"Hi", true, false, "Bye"};
 `Sequence<Integer>` is a Sequence which can only hold Integers.
 `Iterable<String|Boolean>` is an Iterable which can only hold Strings or Booleans.
 
-To understand how generics works, let's create simple generic type that can make a value secret (or accessible only via
-a password):
+The type between the angle brackets (`< >`) is a type parameter for the generic type.
+
+Before we explain this in more detail, let's create a generic type to see how that's done!
+ 
+You might remember that earlier, we defined a type called `SummableList` that satisfied `Iterable<Integer>`... there's
+no reason why this type should be usable only to hold Integers! As Iterable itself, we should allow it to hold values
+of any type.
+
+Here's a new definition of `SummableList` that fixes that problem using generics:
 
 {% highlight ceylon %}
-class Secret<Value>(Value val, String password) {
-    shared Value? get(String pass) {
-        if (password == pass) {
-            return val;
+class SummableList<Element>({Element*} elements) satisfies Summable<SummableList<Element>> & Iterable<Element> {
+    
+    //FIXME these elements should be sorted! We must fix this later.
+    {Element*} _elements = elements; // doSort(elements);
+    
+    plus(SummableList<Element> other) => SummableList(this._elements.chain(other._elements));
+    
+    iterator() => _elements.iterator();
+    
+    hash => _elements.hash;
+    
+    shared actual Boolean equals(Object other) {
+        if (is SummableList<Element> other) {
+            return this.sequence == other.sequence;
         } else {
-            return null;
+            return false;
         }
     }
+    
 }
 {% endhighlight %}
 
-We can then use our Secret type as follows:
+> The type `Element` above is not an actual type, it is only a type parameter which will be "replaced" with a concrete
+  type when an actual instance of SummableList is created.
+
+> you can see in this code sample one of the techniques programmers often use during development: to add comments that
+  start with `FIXME` to describe temporary solutions that need fixing later (but won't affect the development
+  of other parts of the system for some time) or `TODO` for things that need to be done, but cannot be done now for
+  whatever reason. These are easily searchable (in the IDE, open `Window > Show View > Tasks` to see all your TODOs) so
+  you can get back to them later. But not everyone likes that as it might encourage sloppy behavior if abused. It's not
+  uncommon to see hundreds of TODOs on large code bases that will probably go unnoticed for years, if not forever. You
+  are warned, this can be useful, but use with care!
+
+
+We can then use our new SummableList type as follows:
 
 {% highlight ceylon %}
-value secretInteger = Secret(42, "mypass");
-value secretWord = Secret("Ceylon", "secretKeyword");
+// normally, the type parameter is inferred
+value stringList1 = SummableList { "ABC", "XYZ" };
+value integerList1 = SummableList { 1, 2, 3 };
 
-// in some other part of the program
-Integer? secret1 = secretInteger.get("wrong");
-assert(secret1 is Null);
-Integer? secret2 = secretInteger.get("mypass");
-assert(is Integer secret2, secret2 == 42);
+// but you can tell Ceylon what type it should be!
+value stringList2 = SummableList<String> { "ABC", "XYZ" };
+value integerList2 = SummableList<Integer> { 1, 2, 3 };
+{% endhighlight %}
 
-value secret3 = secretWord.get("secretKeyword");
-if (exists secret3) {
-    print("The secret word is ``secret3``");
+If you explicitly declare the type parameter as in the second example above, then all elements of the SummableList must
+be a sub-type of that type.
+
+Now, imagine if `Iterable` were not generic. It would be really painful to use! To access any element, it would be necessary
+to "narrow" its type (with `if` or `assert`) before trying to use it. And there would be no guarantee that the Iterable
+would not contain values of unexpected types, giving bugs a plentiful environment to prosper (this may all sound crazy,
+but in the dark days of computing - ie. 10 years ago or so - programming without generics was actually common-place and
+enabled by, among other sloppy techniques, [type casting](http://howtoprogramwithjava.com/java-cast/) -
+or guessing the type - which Ceylon wisely does not even allow).
+
+But there was a problem in the above implementation of SummableList (the one marked with `FIXME`). We no longer ensured
+that elements of the list were sorted. That was necessary for the current implementation of SummableList to compile for
+one simple reason: the `sort` function, that we use to sort the elements of the list, is a generic function!
+
+That's right, functions can also be generic! Take a look at the type signature of `sort`:
+
+{% highlight ceylon %}
+shared Element[] sort<Element>({Element*} elements) 
+        given Element satisfies Comparable<Element> => ...
+{% endhighlight %}
+
+Ok, so it takes an Iterable of some type `Element` and returns a Sequential of the same type. So far so good, but you are
+probably wondering now what exactly is this `given Element satisfies ...` thing!
+
+That's actually really simple: `given` tells us (and Ceylon) that Element can be any type **as long as**
+(or **given that**) this type satisfies `Comparable<Element>`. In other words, we make the upper bound of our type
+parameter be `Comparable<Element>`.
+
+This is necessary for any sort function to work because to be able to sort a list, you must be able to compare
+an element to another... and any sub-type of `Comparable<Element>` will have to implement the `compare` method, which
+guarantees to us that we can compare a value of this type with any other value of the same type!
+
+Finally, we can address the `FIXME` in the previous implementation of `SummableList`. We could not use the `sort` function
+before because we did not restrict the type of the elements of SummableList, so there was no way to compare them to sort
+them. Now we can do exactly that and solve the problem:
+
+{% highlight ceylon %}
+import ceylon.language { doSort = sort }
+
+class SummableList<Element>({Element*} elements)
+        satisfies Summable<SummableList<Element>> & Iterable<Element>
+        given Element satisfies Comparable<Element> {
+    
+    {Element*} _elements = doSort(elements);
+    
+    plus(SummableList<Element> other) => SummableList(this._elements.chain(other._elements));
+    
+    iterator() => _elements.iterator();
+    
+    hash => _elements.hash;
+    
+    shared actual Boolean equals(Object other) {
+        if (is SummableList<Element> other) {
+            return this.sequence == other.sequence;
+        } else {
+            return false;
+        }
+    }
+    
 }
 {% endhighlight %}
 
+To make our type as re-usable as possible, we should try to restrict their type parameters with the most generic type
+(or highest bound) possible.
 
-TODO
+Making Element's upper bound be `Comparable<Element>` is much better than, say, making it `Scalar` (which is a sub-type
+of Comparable) because all functionality we require from our elements is provided by the higher bound, `Comparable<Element>`.
+Many programmers overlook this fact and needlessly restrict too much the types their functions and types can work with.
+The same is true also for arguments - they should always be of the most generic type for the code to do what it needs to
+do.
 
-For a detailed explanation of the Ceylon type system, check the Ceylon Specification - [Chapter 3](http://ceylon-lang.org/documentation/1.0/spec/html/typesystem.html).
+Often, you will have to make `Object` your type's upper bound because if you do not do that, you will
+have to make sure your generic type or function also works with `Null` values.
+
 
