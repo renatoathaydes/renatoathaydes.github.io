@@ -686,6 +686,84 @@ Give that a try!
 After you're done, compare your solution with [this one](https://gist.github.com/renatoathaydes/54e50f29abad7fda2a27) and
 see what you could have done differently!
 
+## Blocks and scope
+
+Values are always scoped inside blocks in Ceylon. A block is usually enclosed in curly braces. Examples of things that
+have blocks are functions, `if` and `else` branches, and others things like classes, that we will meet later.
+
+Blocks can be *nested*, meaning that you can declare blocks within blocks. A nested block has access to any values declared
+in the enclosing block(s), but values declared in a block cannot be "seen", or accessed, outside of that block.
+
+For example:
+
+{% highlight ceylon %}
+value top = "hi";
+
+if (top == "hi") {
+    // inIf is not visible outside this if branch
+    value inIf = true;
+
+    // can see top from here
+    value topCopy = top;
+} else {
+    // cannot see inIf from here
+    value inElse = true;
+
+    // can see top from here as well
+    value topCopy2 = top;
+}
+
+// name is only visible within the function block
+function topLevel(String name) {
+    // char can only be seen within nameChain's block
+    function nameChain(Character char) {
+        // name can be seen in nested block
+        return name.characters.chain { char };
+    }
+    return name.map(nameChain);
+}
+
+// cannot see anything declared inside the blocks above
+value a = top; // OK
+value b = topLevel; // OK (reference to the function)
+
+value c = inIf; // ERROR
+value d = inElse; // ERROR
+value e = name; // ERROR
+value f = nameChain; // ERROR
+{% endhighlight %}
+
+Scoping values makes it much easier to reason about code as you don't need to keep track of all values ever declared
+anywhere to make sense of the code. Usually you can focus only on the block you're looking at and at the enclosing blocks
+(that's one of the reason nested blocks are best kept at a minimum).
+
+A nested block's value can "cover" a value declared in an enclosing block:
+
+{% highlight ceylon %}
+String topLevel(String name) {
+    Boolean nested(Boolean name) {
+        // here, name is a Boolean
+        return !name;
+    }
+    
+    // here, name is a String
+    String other = name.uppercased;
+    return nested(name.empty) then other else name;
+}
+{% endhighlight %}
+
+The rule used to determine which value you can see in cases like this is very simple: the visible value will be the
+closest one to the expression where you use it.
+
+In the above example, the `Boolean` name is closer than the `String` name to any expression which is inside the
+`nested` function block.
+
+It should be clear that using the same name for values that represent different things is a bad idea. However, in large,
+complex code bases with lots of values in the higher scopes, that may be hard to avoid - another reason to keep nesting
+to a minimum.
+
+Also, make sure you declare your values in the most restricted scope possible to minimize such issues.
+
 ## Representing and using lists
 
 Our maths program is starting to become somewhat useful. But it's still quite limited. For example, it only takes two numbers
