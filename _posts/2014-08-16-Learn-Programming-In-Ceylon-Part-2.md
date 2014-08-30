@@ -35,7 +35,7 @@ Float? askUserForNumber(String question) { ... }
 
 We already mentioned then that `Float?` is just short notation for the type `Float | Null`, which reads as `Float or Null`.
 
-This is called an **union type**.
+This is called a **union type**.
 
 > A union type is a type formed by two or more different types. A value always has a single type, but a function may accept
 or return values of different types. That's the main reason union types exist.
@@ -296,7 +296,7 @@ interface Dealer {
     
     shared formal Comparison compare(Hand hand1, Hand hand2);
     
-    shared default {Hand*} deal(Pack cards, Integer playersCount) =>
+    shared default {Hand+} deal(Pack cards, Integer playersCount) =>
         (1..playersCount).map((Integer i) => dealHand(cards));
         
 }
@@ -328,12 +328,55 @@ value dealer = Dealer();
 value hand = dealer.dealHand(pack);
 {% endhighlight %}
 
-For this reason, before we can run our program, we will have to provide at least one implementation for `Dealer`.
+For this reason, before we can instantiate a sub-type of `Dealer`, we will have to provide at least one implementation for it.
+
+To implement an interface is very simple. You must provide an implementation for each **formal** method. Here's a "dummy"
+implementation of the `Dealer` interface defined above:
+ 
+{% highlight ceylon %}
+class DummyDealer() satisfies Dealer {
+    
+    shared actual Pack shuffle(Pack pack) => pack;
+    
+    shared actual Hand dealHand(Pack cards) => { Card(Ace(), Hearts()) };
+
+    shared actual Comparison compare(Hand hand1, Hand hand2) => larger;
+    
+}
+{% endhighlight %}
+
+This kind of "dummy" implementation (it is called dummy because it does not really implement the behavior, notice how
+`shuffle` does not really shuffle the pack, and `dealHand` just returns the same hand every time)is useful for developing
+large systems gradually so you don't need to implement the whole system before you can even run anything.
+
+Ceylon has a nice short notation for writing `actual` methods with expression (using `=>`): you can just omit everything
+before the name of the method, so the above definition could be written more concisely as:
+
+{% highlight ceylon %}
+class DummyDealer() satisfies Dealer {
+    
+    shuffle(Pack pack) => pack;
+    
+    dealHand(Pack cards) => { Card(Ace(), Hearts()) };
+
+    compare(Hand hand1, Hand hand2) => larger;
+    
+}
+{% endhighlight %}
+
+Although Ceylon aims at making code readable and mostly explicit, it makes an exception in the case of overriding
+formal methods or properties because this is such a common case and no information is lost - if you ever see a method
+that does not seem declare its return type, you know it's because you're seeing this notation and the return type is
+already declared in the interface.
+
+But beware that if you use this notation, it will be implied that the method is declared `shared actual`. If you want to
+make your method definition `default`, which means that you want to allow sub-classes to refine the method definition if
+desired, you would need to explicitly declare it with `shared actual default` followed by the full type signature.
 
 > See the Ceylon Language Specification's chapter on [interfaces](http://ceylon-lang.org/documentation/1.0/spec/html/declarations.html#interfaces)
   for the full story.
 
-### Benefiting from syntax-sugar for operators
+### Syntax-sugar for operators by implementing interfaces
 
 Ceylon provides some *syntax sugar* to make code more readable through the use of certain interfaces.
 
@@ -346,16 +389,16 @@ The only reason why that is possible is because `Integer` satisfies the interfac
 defines `plus`, or `+`), `Numeric` (which defines `minus`, `divided` and `times`, or `-`, `/` and `*`) and `Integral`
 (which defines `remainder`, or `%`).
 
-> Summable is a parameterized type, which means that it always appears in the form `Summable<Element>`, where `Element` is 
+> Summable is a generic type, which means that it always appears in the form `Summable<Element>`, where `Element` is 
   a type parameter - it can be replaced with any type... or at least some allowed types, as we will see later when we
   discuss **generics**.
 
 Anyone could write a type that satisfies `Summable`, to pick one of the interfaces mentioned above, to be able to use
 the `+` operator to add together two instances of that type.
 
-As an example, we can make a Summable kind of Iterable so that we can *add* two Iterables:
+As an example, we can make a Summable kind of Iterable so that we can *add* two Iterables together:
  
-> Notice that in Ceylon, you cannot add two Iterables with the `+` operator. The reason why Ceylon seemingly lacks this
+> Notice that in Ceylon, normally, you cannot add two Iterables with the `+` operator. The reason why Ceylon seemingly lacks this
   functionality is that implementing `plus` for a generic Iterable would likely break the contract of `Summable`
   that requires that the `+` operation be associative.
   For example, { 1, 2 } + { 3 } would have to be the same as { 3 } + { 1, 2 }. In the definition of `SummableList` below, we
@@ -378,25 +421,29 @@ class SummableList({Integer*} integers) satisfies Summable<SummableList> & Itera
     
 }
 
-SummableList result = SummableList { 1, 2 } + SummableList { 3 };
-assert(result.sequence == [1, 2, 3]);
+SummableList list1 = SummableList { 1, 2 } + SummableList { 3 };
+SummableList list2 = SummableList { 3 } + SummableList { 1, 2 };
+assert(list1.sequence == [1, 2, 3]);
+assert(list2.sequence == [1, 2, 3]);
 {% endhighlight %}
 
-The example above, incidentally, shows how a class can declare that it satisfies an interface, or, in this case, two
-interfaces.
+The example above, incidentally, shows how a class can declare that it satisfies more than one interface.
 
 > A class may declare that it satisfies more than one interface by using the `&` symbol between each interface name.
   What this symbol does is similar to what `|` does for union types, but results in an intersection type. Intersection
   types and union types are analogous to sets in set theory. If you look at a type as a set of properties and methods,
   then a union of the two types is the sum of all properties and methods of the two types. The intersection
   of two types is the set of properties and methods which are common to both types. That is why, in the example above,
-  an instance of `SummableList`, which satisfies types `Summable<SummableList>` and `Iterable<Integer>` can be assigned to either type.
+  an instance of `SummableList`, which satisfies types `Summable<SummableList>` and `Iterable<Integer>`, can be assigned
+  to either type.
 
 It also shows how you can import an element and rename it to avoid name clashes (if we didn't rename `sort` to `doSort`,
 it would have clashed with `Iterable`'s own `sort` method inside the definition of `SummableList`, causing a compiling error
 because we are not allowed to use an inherited member in the class initializer).
 
-One important thing to notice is that when a type satisfies an interface, it **inherits** all of its default methods.
+One important thing to notice is that when a type satisfies an interface, besides being forced to implement all `formal`
+methods and properties, it **inherits** all of its default methods.
+
 For this reason, `SummableList` gets a large number of methods pretty much for free:
 
 {% highlight ceylon %}
@@ -445,9 +492,44 @@ On the other hand, abstract classes can still be very useful when there is some 
 appropriately for most expected implementations of a concept in the same manner. This may sound like something that is
 rare in practice, but it actually happens quite often.
 
-For example, it would probably be appropriate to introduce an abstract class for `Dealer`, in our cards game, because a
-dealer must by definition *hold state* (it needs to know who is winning and how many hands have been given, for example),
-which will mostly be handled in the same way regardless of which game is being played.
+For example, a card game itself is a good candidate for an abstract class because any game will always have a number of
+players, a dealer (which can be a player him/herself) and at least one card pack.
+
+Let's try to express all of that in code (with the earlier definitions unaltered), using the most appropriate level of
+abstraction for each element of the game:
+
+{% highlight ceylon %}
+interface Player {
+    shared formal String name;
+}
+
+abstract class Game(Pack pack, Dealer dealer, Player+ players) {
+    shared formal void start();
+}
+
+class MyGame(Pack pack, Dealer dealer, Player+ players)
+    extends Game(pack, dealer, *players) {
+    
+    shared actual void start() {
+        //TODO create the game
+    }
+}
+
+class SimplePlayer(shared actual String name)
+        satisfies Player {}
+
+class MyGameDealer(shared actual String name) 
+        extends DummyDealer()
+        satisfies Player {}
+
+shared void runGame() {
+    value players = [ MyGameDealer("John"), SimplePlayer("Mark") ];
+    value pack = { Card(Ace(), Spades()), Card(Ace(), Hearts()) /* ... */ };
+    
+    value game = MyGame(pack, players.first, *players);
+    game.start();
+}
+{% endhighlight %}
 
 # Objects and Enumerated types
 
@@ -548,10 +630,7 @@ object hearts satisfies Suit { string => "hearts"; }
 object clubs satisfies Suit { string => "clubs"; }
 {% endhighlight %}
 
-> The syntax `string => "something";` is new. This is short notation for `shared actual String string => "something";`.
-  Although Ceylon aims at making code readable and mostly explicit, it makes an exception in the case of overriding
-  formal methods or properties because this is such a common case. Also, once you get a little bit used to this short notation,
-  you immediately recognize it and, arguably, can read the code even more easily than you would otherwise. 
+> The syntax `string => "something";` is again the short notation for `shared actual String => "something"`.
 
 Because we enumerated the possible values of `Suit`, it is just impossible to define any other `Suit` elsewhere.
 You can't even create a class to satisfy `Suit`. Ceylon won't let you! Your class would have to be enumerated after `of`
@@ -730,7 +809,8 @@ In fact, you are encouraged to implement it for most types.
 Just for completeness, let's finally fix `SummableList` and make sure it respects the contract of `Summable`:
 
 {% highlight ceylon %}
-class SummableList({Integer*} integers) satisfies Summable<SummableList> & Iterable<Integer> {
+class SummableList({Integer*} integers)
+    satisfies Summable<SummableList> & Iterable<Integer> {
     
     {Integer*} _integers = doSort(integers);
     
@@ -904,4 +984,24 @@ do.
 Often, you will have to make `Object` your type's upper bound because if you do not do that, you will
 have to make sure your generic type or function also works with `Null` values.
 
+Just like value parameters, type parameters can be many and each can be given a default value.
 
+{% highlight ceylon %}
+class TwoOrThreeThings<A, B, C = Null>(
+    shared A a, shared B b, shared C c) {}
+
+// the third argument defaults to null
+void printTwoThings(TwoOrThreeThings<String, Boolean> twoThings) {
+    print("String is ``twoThings.a`` and Boolean is ``twoThings.b``");
+}
+
+// the third argument is bound to Integer
+void printThreeThings(TwoOrThreeThings<String, Boolean, Integer> threeThings) {
+    print("* String is ``threeThings.a``
+           * Boolean is ``threeThings.b``
+           * Integer is ``threeThings.c``");
+}
+
+printTwoThings(TwoOrThreeThings("Hi", true, null));
+printThreeThings(TwoOrThreeThings("Hi", true, 20));
+{% endhighlight %}
