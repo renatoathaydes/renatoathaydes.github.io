@@ -14,7 +14,10 @@ Iterables: `{'a', 'b', 'c'}`), loops (`for` and `while`), conditionals (`if` `th
 We also created a first, more or less complete program, the *Maths Helper*, that allows users to do some simple maths.
 
 In this part of the series, we will start looking at some more advanced concepts, such as union types, switches,
-custom types, enumerated types, polymorphism and generics.
+custom types, enumerated types, polymorphism, generics and finally, mutability and data structures.
+
+> Ceylon discourages the use of mutability. By default, everything in Ceylon is immutable.
+  We will discuss why that is in the last section of this tutorial.
 
 These concepts will allow you to tackle problems with a high level of complexity in a manageable manner.
 
@@ -291,7 +294,7 @@ interface Dealer {
     
     shared formal Hand dealHand(Pack cards);
     
-    shared formal Comparison compare(Hand hand1, Hand hand2);
+    shared formal Comparison compareHands(Hand hand1, Hand hand2);
     
     shared default {Hand+} deal(Pack cards, Integer playersCount) =>
         (1..playersCount).map((Integer i) => dealHand(cards));
@@ -325,7 +328,7 @@ value dealer = Dealer();
 value hand = dealer.dealHand(pack);
 {% endhighlight %}
 
-For this reason, before we can instantiate a sub-type of `Dealer`, we will have to provide at least one implementation for it.
+For this reason, before we can instantiate a subtype of `Dealer`, we will have to provide at least one implementation for it.
 
 To implement an interface is very simple. You must provide an implementation for each **formal** method. Here's a "dummy"
 implementation of the `Dealer` interface defined above:
@@ -337,7 +340,7 @@ class DummyDealer() satisfies Dealer {
     
     shared actual Hand dealHand(Pack cards) => { Card(Ace(), Hearts()) };
 
-    shared actual Comparison compare(Hand hand1, Hand hand2) => larger;
+    shared actual Comparison compareHands(Hand hand1, Hand hand2) => larger;
     
 }
 {% endhighlight %}
@@ -356,7 +359,7 @@ class DummyDealer() satisfies Dealer {
     
     dealHand(Pack cards) => { Card(Ace(), Hearts()) };
 
-    compare(Hand hand1, Hand hand2) => larger;
+    compareHands(Hand hand1, Hand hand2) => larger;
     
 }
 {% endhighlight %}
@@ -407,7 +410,8 @@ As an example, we can make a Summable kind of Iterable so that we can *add* two 
 import ceylon.language { doSort = sort }
 
 "An always sorted Iterable containing Integers that can be summed."
-class SummableList({Integer*} integers) satisfies Summable<SummableList> & Iterable<Integer> {
+class SummableList({Integer*} integers)
+    satisfies Summable<SummableList> & Iterable<Integer> {
     
     {Integer*} _integers = doSort(integers);
     
@@ -747,12 +751,12 @@ In practice, this means one of two things in Ceylon: sub-typing and generics.
 
 ### Sub-typing
 
-We have already met sub-typing a few times. Every time we satisfy an interface `A` in a class `B`, `B` becomes a sub-type
-of `A`. It works the same way when a class `X` extends class `Y`: `X` becomes a sub-type of `Y` (and `Y` a super-type
+We have already met sub-typing a few times. Every time we satisfy an interface `A` in a class `B`, `B` becomes a subtype
+of `A`. It works the same way when a class `X` extends class `Y`: `X` becomes a subtype of `Y` (and `Y` a super-type
 of `X`).
 
-Most of the time, a sub-type can be seen, and treated, in the exact same way as its super-type(s). This becomes obvious
-when you consider that a sub-type inherits all the behavior of its super-type(s).
+Most of the time, a subtype can be seen, and treated, in the exact same way as its super-type(s). This becomes obvious
+when you consider that a subtype inherits all the behavior of its super-type(s).
 
 Let's look at a concrete example. We mentioned earlier that all custom types, by default, extend `Basic`.
 
@@ -811,7 +815,8 @@ class SummableList({Integer*} integers)
     
     {Integer*} _integers = doSort(integers);
     
-    plus(SummableList other) => SummableList(this._integers.chain(other._integers));
+    plus(SummableList other) =>
+        SummableList(this._integers.chain(other._integers));
     
     iterator() => _integers.iterator();
     
@@ -861,12 +866,14 @@ of any type.
 Here's a new definition of `SummableList` that fixes that problem using generics:
 
 {% highlight ceylon %}
-class SummableList<Element>({Element*} elements) satisfies Summable<SummableList<Element>> & Iterable<Element> {
+class SummableList<Element>({Element*} elements)
+    satisfies Summable<SummableList<Element>> & Iterable<Element> {
     
     //FIXME these elements should be sorted! We must fix this later.
     {Element*} _elements = elements; // doSort(elements);
     
-    plus(SummableList<Element> other) => SummableList(this._elements.chain(other._elements));
+    plus(SummableList<Element> other) =>
+        SummableList(this._elements.chain(other._elements));
     
     iterator() => _elements.iterator();
     
@@ -908,7 +915,7 @@ value integerList2 = SummableList<Integer> { 1, 2, 3 };
 {% endhighlight %}
 
 If you explicitly declare the type parameter as in the second example above, then all elements of the SummableList must
-be a sub-type of that type.
+be a subtype of that type.
 
 Now, imagine if `Iterable` were not generic. It would be really painful to use! To access any element, it would be necessary
 to "narrow" its type (with `if` or `assert`) before trying to use it. And there would be no guarantee that the Iterable
@@ -936,7 +943,7 @@ That's actually really simple: `given` tells us (and Ceylon) that Element can be
 parameter be `Comparable<Element>`.
 
 This is necessary for any sort function to work because to be able to sort a list, you must be able to compare
-an element to another... and any sub-type of `Comparable<Element>` will have to implement the `compare` method, which
+an element to another... and any subtype of `Comparable<Element>` will have to implement the `compare` method, which
 guarantees to us that we can compare a value of this type with any other value of the same type!
 
 Finally, we can address the `FIXME` in the previous implementation of `SummableList`. We could not use the `sort` function
@@ -952,7 +959,8 @@ class SummableList<Element>({Element*} elements)
     
     {Element*} _elements = doSort(elements);
     
-    plus(SummableList<Element> other) => SummableList(this._elements.chain(other._elements));
+    plus(SummableList<Element> other) =>
+        SummableList(this._elements.chain(other._elements));
     
     iterator() => _elements.iterator();
     
@@ -969,10 +977,10 @@ class SummableList<Element>({Element*} elements)
 }
 {% endhighlight %}
 
-To make our type as re-usable as possible, we should try to restrict their type parameters with the most generic type
+To make our types as re-usable as possible, we should try to restrict their type parameters with the most generic type
 (or highest bound) possible.
 
-Making Element's upper bound be `Comparable<Element>` is much better than, say, making it `Scalar` (which is a sub-type
+Making Element's upper bound be `Comparable<Element>` is much better than, say, making it `Scalar` (which is a subtype
 of Comparable) because all functionality we require from our elements is provided by the higher bound, `Comparable<Element>`.
 Many programmers overlook this fact and needlessly restrict too much the types their functions and types can work with.
 The same is true also for arguments - they should always be of the most generic type for the code to do what it needs to
@@ -981,7 +989,7 @@ do.
 Often, you will have to make `Object` your type's upper bound because if you do not do that, you will
 have to make sure your generic type or function also works with `Null` values.
 
-Just like value parameters, type parameters can be many and each can be given a default value.
+Just like value parameters, there can be many type parameters and each one can be given a default value.
 
 {% highlight ceylon %}
 class TwoOrThreeThings<A, B, C = Null>(
@@ -1006,7 +1014,232 @@ printThreeThings(TwoOrThreeThings("Hi", true, 20));
 
 ### Covariant and contravariant type parameters
 
+Type parameters can be declared in 3 different ways:
 
-TODO
+* **invariant**: as all the type parameters we have met above.
+* **covariant**: parameters declared with `out`, as in `Iterable<out Element>`.
+* **contravariant**: parameters declared with `in`, as in `ListMutator<in Element>`.
 
+If a type parameter in **invariant**, like the `SummableList` we have created, then a `SummableList<SimplePlayer>`, for
+example, is NOT a subtype of `SummableList<Player>` (even though it seems logical it should be, because `SimplePlayer`
+is a subtype of `Player`). Because of that, the following code will not compile:
+
+{% highlight ceylon %}
+void playGame(SummableList<Player> players) {
+    //TODO
+}
+
+SummableList<SimplePlayer> players = SummableList { SimplePlayer("Anna") };
+
+// does not compile!
+playGame(players);
+{% endhighlight %}
+
+If a type parameter is **covariant**, as the type parameter of `Iterable`, then an `Iterable<SimplePlayer>`, for example,
+will be a subtype of `Iterable<Player>` because `SimplePlayer` is a subtype of `Player`, so the above code sample will
+compile if we substitute SummableList with Iterable:
+
+{% highlight ceylon %}
+void playGame({Player*} players) {
+    //TODO
+}
+
+Iterable<SimplePlayer> players = { SimplePlayer("Anna") };
+
+playGame(players);
+{% endhighlight %}
+
+Contravariant type parameters can be seen as the opposite of covariant type parameters.
+
+If B is a subtype of A, and there is a type T with a covariant type parameter, then `T<B>` is a subtype of
+`T<A>`, as we've seen above.
+
+If T has a contravariant type parameter instead, then `T<B>` is a supertype of `T<A>`, not a subtype of it! 
+
+Another way of looking at it is to think of a type with a covariant type parameter `E` as a *producer* of `E`, and of a
+type with a contravariant type parameter `E` as a *consumer* of `E`.
+
+Think about it, you can get instances of `E` from a non-empty `Iterable<E>` (by using the property `first` for example).
+In a way, you can get `E`s *out* of an `Iterable<E>` (that's basically why in Ceylon we use the word `out` to indicate
+covariance).
+
+Examples of types with contravariant type parameters are usually mutable data structures (we'll meet them in the next
+section) which allow adding elements *in*
+or just use the elements to provide some service. These types can be seen as *consumers* of `E`. We can pass `E`s *in* to
+them, explaining why `in` is used for contravariant type parameters.
+
+There is a very good discussion of [covariant and contravariant](http://ceylon-lang.org/documentation/1.0/tour/generics/)
+type parameters in the Tour of Ceylon, so have a look at it if you want to know more details. For those of you who are
+interested in the low-level details, this [blog post](http://ceylon-lang.org/blog/2013/11/17/intersections-and-variance/)
+by Gavin King (creator of Ceylon) might be of interest.
+
+## Mutability and data structures that can change
+
+Most languages take mutability, or the ability to change values and state, for granted.
+For example, the following is perfectly valid in Java:
+
+{% highlight java %}
+// Java code
+String fruit = "apple";
+fruit = "orange";
+fruit = "banana";
+{% endhighlight %}
+
+In Ceylon, you wouldn't normally be able to do that:
+
+{% highlight ceylon %}
+String fruit = "apple";
+fruit = "orange"; // DOES NOT COMPILE
+fruit = "banana"; // DOES NOT COMPILE
+{% endhighlight %}
+
+Once you've assigned the value `"apple"` to the identifier `fruit`, you cannot change your mind and
+say it's an `"orange"` or a `"banana"` instead.
+
+You can also do the following to change the contents of a list (or array, in this case) in most languages:
+
+{% highlight java %}
+// Java code
+String[] fruits = { "apple", "orange", "banana" };
+
+// change some fruits
+fruits[1] = "pear";
+fruits[2] = "pineapple";
+
+// comparing two arrays in Java. Enable assertions with the -ea JVM argument
+assert(Arrays.equals(fruits, new String[] { "apple", "pear", "pineapple" }));
+{% endhighlight %}
+
+In Ceylon, you cannot do this using the familiar Iterable and Sequential (you would need to use the Array class,
+as we'll see).
+
+Avoiding mutability makes it much easier to reason about the code. You do
+not need to consider the possibility that any of your values might be modified at any time, almost anywhere in the code
+base where that data is visible (though scoping alleviates some of this, it cannot solve the problem completely),
+and that the timing of these changes can be hard to manage, which can potentially cause many bugs.
+
+There are also other considerations that make mutability something you should be careful with, such as visibility across
+[different threads](http://en.wikipedia.org/wiki/Thread_safety), which we are not yet ready to discuss as we have not
+met Threads before, that make parallel programming incredibly harder!
+
+Some languages (pure functional languages, notably Haskell) simply do not allow things to be changed at all
+(but it is still possible to write fully functioning programs in them, though sometimes inconvenient).
+
+Ceylon, on the other hand, does allow changes, or mutability, because there are certain cases which make it
+quite impractical (or just very inefficient) for the programmer to not be able to change things
+(we'll see later how it will be convenient to allow a `Pack` of cards to change during a game, for example).
+It is just not the "default" way of doing things because it is understood these days that the cost of unrestricted
+mutability is too high to compensate for the apparent convenience it provides.
+
+Let's see how mutability is supported in Ceylon.
+
+For example, if you really want to change the value of your fruit as the program runs, you can annotate `fruit`
+with the `variable` annotation:
+
+> An annotation in Ceylon is just a special kind of function that allows extra metadata to be provided and
+  used at runtime to modify the behavior of the program. We have already met some annotations:
+  `shared`, `formal`, `default`, `actual`, `abstract`, and now, `variable`, are all annotations. 
+  As usual, this is explained in detail in the [Tour](http://ceylon-lang.org/documentation/1.0/tour/annotations/).
+
+{% highlight ceylon %}
+variable String fruit = "apple";
+fruit = "orange"; // OK!
+fruit = "banana"; // OK!
+{% endhighlight %}
+
+Iterables and Sequences are not modifiable (we call them immutable), so you cannot do as in the Java example and change
+which elements they contain after they've been created... but Ceylon does provide mutable (ie. modifiable)
+data structures such as the simple `Array` in the language module, and `LinkedList`, `HashMap` and `HashSet`
+in the `ceylon.collection` module (more collections will be added in Ceylon 1.1).
+
+Using `Array`in Ceylon:
+
+{% highlight ceylon %}
+value fruits = Array { "apple", "orange", "banana" };
+
+// change item at index 1 to "pear"
+fruits.set(1, "pear");
+
+// change item at index 2 to "pineapple"
+fruits.set(2, "pineapple");
+
+assert(fruits == ["apple", "pear", "pineapple"]);
+{% endhighlight %}
+
+Arrays are (probably) not used very often in Ceylon because even though you can change them, you cannot add or remove
+items to make them grow or shrink in size. For that, you can use an LinkedList, for example, from the `ceylon.collection`
+module.
+
+To use the collection module, you need to import it in your `module.ceylon` file:
+
+{% highlight ceylon %}
+module hello.ceylonn "1.0.0" {
+    import ceylon.collection "1.0.0";
+}
+{% endhighlight %}
+
+> Ceylon provides a large number of modules ready to be used out-of-the-box, just enter a new line below the first
+  import in `module.ceylon`, type `import ceylon` and hit `Ctrl+Space` to see what else you can import!
+  The complete list of Ceylon modules, including also third-party modules, can be seen in the
+  [Ceylon Herd](https://modules.ceylon-lang.org/), which is the Ceylon module repository. Any module from Herd can be
+  imported as shown above: just add the appropriate import in you module file and it will be automatically downloaded.
+
+You are now able to import anything provided by the collection module, such as a `LinkedList`:
+
+{% highlight ceylon %}
+import ceylon.collection { LinkedList }
+
+value fruits = LinkedList { "apple", "orange", "banana" };
+fruits.set(1, "pear");
+fruits.set(2, "pineapple");
+
+// we can also add some fruit
+fruits.add("persimon");
+fruits.add("fig");
+
+// ... and remove a fruit
+fruits.removeElement("pineapple");
+
+assert(fruits == ["apple", "pear", "persimon", "fig"]);
+{% endhighlight %}
+
+`HashSet` is a data structure that can be used to store unique entries efficiently (as in maths, sets cannot contain
+duplicates). They use the hash code of the items (as we've seen before, all `Object` subtypes have a `hash`
+property) they store to make items lookup faster. If you want to avoid having more than one `"apple"` or `"orange"` in
+your fruits collection, for example, just use a `HashSet` and it will take care of that for you.
+
+> As noticed earlier, it is a very good idea to refine the `equals` and `hash` methods in each type you expect to store
+  in HashSets or as keys for HashMaps. Also, never store mutable objects in a `HashSet` or `HashMap` because if the `hash`
+  of the object changes after it is added to the container, it will almost certainly become irretrievable!
+
+`HashMap` can map keys to values and is widely used as a in-memory data storage. We can, for example, use a HashMap to
+keep the score of each Player in a game:
+
+{% highlight ceylon %}
+value player1 = SimplePlayer("Anna");
+value player2 = SimplePlayer("John");
+
+value scoreByPlayer = HashMap { player1 -> 10, player2 -> 5 };
+
+value player1Score = scoreByPlayer[player1] else 0;
+value player2Score = scoreByPlayer[player2] else 0;
+
+value winner = (player1Score > player2Score) then player1 else player2;
+
+print("``winner.name`` wins!");
+{% endhighlight %}
+
+The syntax `player1 -> 10` creates an instance of `Entry<SimplePlayer, Integer>`, or, equivalently, `SimplePlayer -> Integer`.
+Entries are a convenient way to build maps, as shown above.
+
+Accessing items of the map can be done using square brackets, as shown above, or equivalently, using the `get` method:
+
+{% highlight ceylon %}
+Integer? player1Score = scoreByPlayer.get(player1);
+{% endhighlight %}
+
+We usually use `else defaultValue` when trying to access values of Maps because `get` returns either the value associated
+with the key, or `null` if no value exists for that key
+(notice that values of a Map are restricted to subtypes of Object so you cannot add `null` as a value in a Map,
+ensuring that `null` really represents the absence of a value).
 
