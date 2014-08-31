@@ -1100,15 +1100,12 @@ You will never know everything there is to know, and given the relatively young 
 nobody really knows what is the best way to create software yet. And this is what makes programming so exciting! We're still
 figuring out most of it, and every new programmer can help finding better and smarter ways to code.
 
-## Where to now?
+## Final remarks
 
-I hope that this tutorial has made you excited about the possibilities of writing code with Ceylon.
-A lot of things have been covered: types, values, functions, lists, conditionals, loops, comprehensions!
-But there still is many more to learn: custom types, interfaces, alias, objects, mutability, polymorphism, enumerated types,
-parameterized types, importing/exporting modules, using third-party [libraries](https://modules.ceylon-lang.org), and so much more.
-These, I hope, will be the subject of subsequent parts of this tutorial, so stay tuned!
+Good work in getting this far! I hope you enjoyed this first part and were able to follow most of it without feeling too
+bored or confused.
 
-If you don't fully understood some concept, write code to experiment with it. All experienced programmers
+If you didn't fully understood some concept, write code to experiment with it. All experienced programmers
 agree that the best way to learn code is to write code. So get your hands dirty and write as much code as you can.
 
 There will be times when you will get frustrated because something doesn't work. This is natural and is an absolute
@@ -1129,9 +1126,22 @@ There's lots of people there who will be really happy to help. No question is a 
 All of us who write code probably had the same troubles you're likely to get into, so we know exactly
 how it feels and best of all, how to get over them!
 
+Google is also your friend, though because Ceylon is such a young language, you may not find much outside of the official
+documentation (as of 2014 at least).
+
+## Where to now?
+
+I hope that this tutorial has made you excited about the possibilities of writing code with Ceylon.
+A lot of things have been covered: types, values, functions, lists, conditionals, loops, comprehensions!
+But there still is many more to learn: custom/union types, interfaces, alias, objects, mutability, polymorphism, enumerated types,
+parameterized types, importing modules, using third-party [libraries](https://modules.ceylon-lang.org), and so much more.
+
+Many of these are the subject of [Part 2](/Learn-Programming-In-Ceylon-Part-2) of this tutorial.
+
 That's it for now! Let me know that you enjoyed this tutorial by *starring* [this repo](https://github.com/renatoathaydes/renatoathaydes.github.io)!
 The more stars I get, the more motivation I will have to keep writing and covering the more advanced (and fun) features of Ceylon.
 
 Happy coding!
 
+[Read Part 2 now!](/Learn-Programming-In-Ceylon-Part-2)
 

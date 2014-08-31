@@ -1243,3 +1243,11 @@ with the key, or `null` if no value exists for that key
 (notice that values of a Map are restricted to subtypes of Object so you cannot add `null` as a value in a Map,
 ensuring that `null` really represents the absence of a value).
 
+## Practice time
+
+In the next section, we will focus less on theory and more on practice, and try to implement a fully functional cards
+game using all the knowledge we have gained through Parts 1 and 2. You should be able to do it yourself by now anyway,
+so [let me know](<mailto:renato@athaydes.com>) if you have and I will add a link to your project below!
+
+Stay tuned for Part 3... it's coming soon!
+
