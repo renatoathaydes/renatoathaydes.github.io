@@ -431,12 +431,10 @@ assert(list2.sequence == [1, 2, 3]);
 The example above, incidentally, shows how a class can declare that it satisfies more than one interface.
 
 > A class may declare that it satisfies more than one interface by using the `&` symbol between each interface name.
-  What this symbol does is similar to what `|` does for union types, but results in an intersection type. Intersection
-  types and union types are analogous to sets in set theory. If you look at a type as a set of properties and methods,
-  then a union of the two types is the sum of all properties and methods of the two types. The intersection
-  of two types is the set of properties and methods which are common to both types. That is why, in the example above,
-  an instance of `SummableList`, which satisfies types `Summable<SummableList>` and `Iterable<Integer>`, can be assigned
-  to either type.
+  What this symbol does is similar to what `|` does for union types, but results in an intersection type. Whereas an
+  instance of a union type `A|B` can be either an instance of `A` or of `B`, an instance of `A&B` is an instance of both
+  `A` and `B`. That is why, in the example above, an instance of `SummableList`, which satisfies types `Summable<SummableList>`
+  and `Iterable<Integer>`, can be assigned to either type.
 
 It also shows how you can import an element and rename it to avoid name clashes (if we didn't rename `sort` to `doSort`,
 it would have clashed with `Iterable`'s own `sort` method inside the definition of `SummableList`, causing a compiling error
@@ -762,7 +760,7 @@ Let's look at a concrete example. We mentioned earlier that all custom types, by
 
 Effectively, writing `class A() {}` is equivalent to writing `class A() extends Basic() {}`.
 
-> You can open any type declaration in the IDE by hitting Ctrl+Shit+T and entering the name of a type.
+> You can open any type declaration in the IDE by hitting Ctrl+Shift+T and entering the name of a type.
   Have a look at the definitions of `Basic` and `Object`! With a type opened, hit Ctrl+T to see the type hierarchy.
 
 
