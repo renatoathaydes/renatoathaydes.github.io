@@ -846,8 +846,18 @@ if (nonempty sequence) {
 
 An alternative way to represent lists uses curly braces rather than square-brackets, as in `{Integer+} list = {1, 2};`.
 These are called `Iterable`, while the ones that use square-brackets are called `Sequential`.
-They behave much the same way, except that Iterables are evaluated lazily.
-Roughly anywhere an `Iterable` is required, you can use a `Sequential`, but not the other way around.
+They behave much the same way, except that Iterables are usually evaluated lazily so they are more efficient memory-wise,
+but Sequential provides more methods and properties (especially ones that would usually be too expensive, or slow,
+to implement for lazy lists).
+
+> Being [lazily evaluated](http://en.wikipedia.org/wiki/Lazy_evaluation) means being evaluated only when required,
+  rather than at declaration time, where possible. For example, the `Range` (which we will meet just below) from one to
+  one-million can be declared as `1..1M`,
+  and luckily it will be only lazily evaluated, so unless you actually use all of its values, Ceylon will avoid the hard
+  work of creating a Range one-million items long (like any lazy person would!) and will only evaluate items as needed.
+
+Roughly anywhere an `Iterable` is required, you can use a `Sequential`, but not the other way around. This is because 
+Sequential is a subtype of Iterable (we will see more about this in Part 2).
 
 If you have two Iterables which you want to treat as a single one, you can use the `chain` method to *chain* one Iterable
 to the other, giving a single Iterable:
