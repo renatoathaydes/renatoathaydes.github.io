@@ -485,7 +485,7 @@ A concrete class (ie. a non-abstract class) may only extend one abstract class. 
 interfaces. For this reason, it is usually preferable to use interfaces to define things unless you must hold internal
 state, which you cannot do in an interface.
 
-> In this context, *state* means having one or more fields that refer to other Objects.
+> In this context, *state* means having one or more fields.
 
 On the other hand, abstract classes can still be very useful when there is some common functionality that can be implemented
 appropriately for most expected implementations of a concept in the same manner. This may sound like something that is
@@ -765,6 +765,7 @@ Effectively, writing `class A() {}` is equivalent to writing `class A() extends 
 
 
 ![Ceylon type hierarchy](/images/ceylon_type_hierarchy.png)
+*The top part of the Ceylon type hierarchy*
 
 
 `Basic` does not define any property or method, but it extends `Object` and satisfies `Identifiable`.
@@ -939,6 +940,11 @@ probably wondering now what exactly is this `given Element satisfies ...` thing!
 That's actually really simple: `given` tells us (and Ceylon) that Element can be any type **as long as**
 (or **given that**) this type satisfies `Comparable<Element>`. In other words, we make the upper bound of our type
 parameter be `Comparable<Element>`.
+
+> We say upper bound because in a type hierarchy diagram, a type is usually positioned lower than its supertypes (like
+  in the one we showed earlier of the Ceylon type hierarchy). So, when you want to
+  express that a generic container requires that all the elements it holds should be of a type which is a subyptes of
+  some type `A`, you can say more concisely that the upper bound of the type parameter of the container is `A`.
 
 This is necessary for any sort function to work because to be able to sort a list, you must be able to compare
 an element to another... and any subtype of `Comparable<Element>` will have to implement the `compare` method, which
