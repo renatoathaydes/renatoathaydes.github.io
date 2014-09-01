@@ -943,7 +943,7 @@ parameter be `Comparable<Element>`.
 
 > We say upper bound because in a type hierarchy diagram, a type is usually positioned lower than its supertypes (like
   in the one we showed earlier of the Ceylon type hierarchy). So, when you want to
-  express that a generic container requires that all the elements it holds should be of a type which is a subyptes of
+  express that a generic container requires that all the elements it holds should be of a type which is a subtype of
   some type `A`, you can say more concisely that the upper bound of the type parameter of the container is `A`.
 
 This is necessary for any sort function to work because to be able to sort a list, you must be able to compare
