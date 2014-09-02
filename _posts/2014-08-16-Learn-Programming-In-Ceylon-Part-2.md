@@ -172,7 +172,7 @@ large type name again and again.
 
 > Aliases do not actually create new types, they simply 'rename' an existing type or a simple type expression.
 
-Besides type aliases, Ceylon also has class aliases which can be used to use an existing class but with a different name:
+Besides type aliases, Ceylon also has class aliases which can be used to give an existing class a different name:
 
 {% highlight ceylon %}
 class NameList({FullName?*} name) => Array<FullName?>(name);
