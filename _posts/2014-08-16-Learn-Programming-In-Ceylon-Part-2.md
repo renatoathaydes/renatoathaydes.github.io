@@ -207,8 +207,8 @@ for (fullName in names) {
 Running this prints:
 
 ```
-First Name: John
-First Name: Anna
+First Name: John<br/>
+First Name: Anna<br/>
 First Name: <INVALID>
 ```
 
