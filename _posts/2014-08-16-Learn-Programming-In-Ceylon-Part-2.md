@@ -206,11 +206,10 @@ for (fullName in names) {
 
 Running this prints:
 
-```
-First Name: John<br/>
-First Name: Anna<br/>
-First Name: <INVALID>
-```
+> First Name: John<br/>
+  First Name: Anna<br/>
+  First Name: `<INVALID>`
+
 
 ## Custom types with classes
 
