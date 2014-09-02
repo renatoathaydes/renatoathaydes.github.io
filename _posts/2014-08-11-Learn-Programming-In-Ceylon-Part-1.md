@@ -633,7 +633,8 @@ The error message in the last run states that the option assertion was violated 
 
 It is considered good practice to keep each function you write (including the `run` function) at most a dozen or so lines long.
 
-The resulting program may be a little longer than it was before, but writing code like this has several benefits:
+The resulting program may be a little longer than if you just wrote a single, long function, but writing code like this
+has several benefits:
 
 * every function you write can be re-used in many places (make it `shared` if you want to maximize re-usability - at the cost
   of flexibility, as it gets harder and harder to change functions once they are used in more and more places).
@@ -1083,6 +1084,10 @@ shared void run() {
     print("Bye!");
 }
 {% endhighlight %}
+
+> The example above uses the `+` operator to concatenate Strings. Because Ceylon supports String interpolation,
+  this is not used very often, but it is good to know that you can do it because many programmers write
+  code like this (especially Java developers, because that's the only way to do this in Java).
 
 ## Some general software development remarks
 
