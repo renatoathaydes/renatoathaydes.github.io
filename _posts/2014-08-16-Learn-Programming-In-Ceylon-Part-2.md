@@ -342,7 +342,8 @@ interface Dealer {
 {% endhighlight %}
 
 > Notice that each method of an interface which does not have a default implementation must be declared `formal`.
-  Default implementations can be provided and must be declared `default`.
+  Default implementations can be provided and **might** be declared `default` (if not marked default, the method cannot
+  be refined by implementations of the interface).
 
 `Dealer` is just a concept, it does not define how to do anything (notice how the formal methods have no body)
 except for the trivial case of defining the `deal` method, as that can be easily done in terms of the formal method
