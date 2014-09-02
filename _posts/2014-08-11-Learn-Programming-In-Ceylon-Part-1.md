@@ -463,15 +463,10 @@ A boolean expression usually contains one or more of the comparison or logical o
 > If you don't know much about logic, that's fine. All you need to know for now is that an AND condition is true if and
   only if both operands are true. An OR condition is true if and only if one or more of its operands are true.
 
-The following keywords can also be part of a boolean expression (don't worry if you don't know what `null` or `Iterable` mean,
-they will be explained shortly):
+A few keyword operators (which will be explained in time), such as `exists`, `nonempty`, `in` and `is` can also be part
+of a boolean expression.
 
-* `exists`   - checks something is not `null`
-* `nonempty` - checks an Iterable contains at least one element
-* `in`       - checks an element is present in an Iterable
-* `is`       - checks a value is an instance of some type
-
-For example:
+Some examples will probably make much more sense than any explanation:
 
 {% highlight ceylon %}
 if (5 > 0) {
@@ -846,9 +841,9 @@ if (nonempty sequence) {
 
 An alternative way to represent lists uses curly braces rather than square-brackets, as in `{Integer+} list = {1, 2};`.
 These are called `Iterable`, while the ones that use square-brackets are called `Sequential`.
-They behave much the same way, except that Iterables are usually evaluated lazily so they are more efficient memory-wise,
-but Sequential provides more methods and properties (especially ones that would usually be too expensive, or slow,
-to implement for lazy lists).
+They behave much the same way, except that Iterables might be evaluated lazily (see explanation below) and do not
+necessarily provide the same elements when iterated more than once, and Sequential offers more methods and properties,
+besides providing always the same elements.
 
 > Being [lazily evaluated](http://en.wikipedia.org/wiki/Lazy_evaluation) means being evaluated only when required,
   rather than at declaration time, where possible. For example, the `Range` (which we will meet just below) from one to

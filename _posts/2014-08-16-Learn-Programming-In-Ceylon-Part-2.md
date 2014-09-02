@@ -938,13 +938,13 @@ Ok, so it takes an Iterable of some type `Element` and returns a Sequential of t
 probably wondering now what exactly is this `given Element satisfies ...` thing!
 
 That's actually really simple: `given` tells us (and Ceylon) that Element can be any type **as long as**
-(or **given that**) this type satisfies `Comparable<Element>`. In other words, we make the upper bound of our type
-parameter be `Comparable<Element>`.
+(or **given that**) this type satisfies `Comparable<Element>`. We call this the *"upper bound"* of the type parameter.
+So in this case `Comparable<Element>` is the upper bound of the type parameter of the `sort` function.
 
-> We say upper bound because in a type hierarchy diagram, a type is usually positioned lower than its supertypes (like
-  in the one we showed earlier of the Ceylon type hierarchy). So, when you want to
-  express that a generic container requires that all the elements it holds should be of a type which is a subtype of
-  some type `A`, you can say more concisely that the upper bound of the type parameter of the container is `A`.
+> When we say *upper bound* you can think back to the Ceylon type hierarchy diagram we showed earlier. Subtypes are
+  generally shown *below* their supertypes. Giving a type parameter an upper bound is like saying that that type may not
+  be "higher placed" in the hierarchy than some other type (the *upper bound*).
+  Any types allowed by that upper bound are either exactly the same as the upper bound or subtypes of (*below*) it.
 
 This is necessary for any sort function to work because to be able to sort a list, you must be able to compare
 an element to another... and any subtype of `Comparable<Element>` will have to implement the `compare` method, which
