@@ -172,6 +172,46 @@ large type name again and again.
 
 > Aliases do not actually create new types, they simply 'rename' an existing type or a simple type expression.
 
+Besides type aliases, Ceylon also has class aliases which can be used to use an existing class but with a different name:
+
+{% highlight ceylon %}
+class NameList({FullName?*} name) => Array<FullName?>(name);
+{% endhighlight %}
+
+Class aliases, unlike type aliases, can be used to create instances of the aliased type, as the example below
+demonstrates:
+
+{% highlight ceylon %}
+"Creates a valid FullName, or null if not possible"
+FullName? name(String fullName) {
+    value nameParts = [ for (part in fullName.split()) 
+                        if (nonempty n = part.sequence) n ];
+    if (nonempty nameParts) {
+        return nameParts;
+    } else {
+        return null;
+    }
+}
+
+value names = NameList({ "John Smith", "Anna Brown", "" }.map(name));
+
+// print the first names
+for (fullName in names) {
+    print("First Name: ``fullName?.first else "<INVALID>"``");
+}
+{% endhighlight %}
+
+> In the expression `fullName?.first`, the question mark enables "null-safe" property access. It allows us to get the value
+  of the property `first` of `fullName` if `fullName` is not null, and if it is null, the whole expression evaluates to `null`.
+
+Running this prints:
+
+```
+First Name: John
+First Name: Anna
+First Name: <INVALID>
+```
+
 ## Custom types with classes
 
 Imagine we want to model playing cards to create a cards game. With what we know so far, we would have to improvise and use
