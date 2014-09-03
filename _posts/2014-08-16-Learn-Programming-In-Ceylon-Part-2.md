@@ -7,7 +7,7 @@ title: Learn Programming in Ceylon - Part 2
 
 In [Part 1](http://renatoathaydes.github.io/Learn-Programming-In-Ceylon-Part-1) of this series, we had a look at quite a
 lot of concepts! We saw how to get started with Ceylon and its IDE, what types (`String`, `Boolean` etc) and values
-(`"Hello"`, `true`) are, functions (`function add(Float x, Float y) => x * y`), lists (Sequences and Tuples: `[1, 2, 3]`,
+(`"Hello"`, `true`) are, functions (`function add(Float x, Float y) => x + y`), lists (Sequences and Tuples: `[1, 2, 3]`,
 Iterables: `{'a', 'b', 'c'}`), loops (`for` and `while`), conditionals (`if` `then` `else`), comprehensions
 (`{ for (a in as) a.something }`), and finally, variadic parameters (`function takeManyStrings(String* strings) => ...`).
 
@@ -386,11 +386,11 @@ class DummyDealer() satisfies Dealer {
 {% endhighlight %}
 
 This kind of "dummy" implementation (it is called dummy because it does not really implement the behavior, notice how
-`shuffle` does not really shuffle the pack, and `dealHand` just returns the same hand every time)is useful for developing
+`shuffle` does not really shuffle the pack, and `dealHand` just returns the same hand every time) is useful for developing
 large systems gradually so you don't need to implement the whole system before you can even run anything.
 
-Ceylon has a nice short notation for writing `actual` methods with expression (using `=>`): you can just omit everything
-before the name of the method, so the above definition could be written more concisely as:
+Ceylon has a nice short notation for writing `actual` methods with a single expression (using `=>`): you can just omit
+everything before the name of the method, so the above definition could be written more concisely as:
 
 {% highlight ceylon %}
 class DummyDealer() satisfies Dealer {
