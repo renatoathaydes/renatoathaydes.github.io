@@ -257,7 +257,7 @@ Card aceOfSpades = Card(Ace(), Spades());
 {% endhighlight %}
 
 This is looking good, but there's a problem with our definition of `Rank`: it still allows any `Integer` to be a valid
-rank, but as we know, in any game of cards, the rank it limited to just a few numbers, besides *Ace*, *Jack*, *Queen*
+rank, but as we know, in any game of cards, the rank is limited to just a few numbers, besides *Ace*, *Jack*, *Queen*
 and *King*.
 
 The first solution that might come to mind might be to modify the `Card` class declaration to check that the value provided
@@ -266,7 +266,7 @@ for the rank is valid in case it is an `Integer` (in the other cases, no check i
 {% highlight ceylon %}
 class Card(shared Rank rank, shared Suit suit) {
     if (is Integer rank) {
-        assert(rank in 2..7);
+        assert(rank in 2..10);
     }
 }
 {% endhighlight %}
