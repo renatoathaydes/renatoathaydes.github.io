@@ -398,12 +398,12 @@ if (medicalAttributes.size == 1, exists attributes = medicalAttributes.first) {
 }
 ```
 
-Note that in the 2 previous examples, 2 different methods were using to extract information from the
-attributes Tuple: in the first, we deconstructed the Tuple directly, in the second, we accessed the
+Note that in the previous examples, two different methods were used to extract information from the
+attributes `Tuple`: in the first, we deconstructed the `Tuple` directly, in the second, we accessed the
 elements we were interested in by index. Unlike in most languages, both are completely type-safe:
 
 ```ceylon
-// deconstructing the legal attributes Tuple with explicit types
+// deconstructing the legal attributes Tuple with types declared explicitly
 value [SocialSecurityNumber ssn, Nationality nationality] = attributes;
 ```
 
@@ -413,5 +413,10 @@ value [SocialSecurityNumber ssn, Nationality nationality] = attributes;
 Allergies allergies = attributes[0];
 CurrentMedication currentMedication = attributes[2];
 ```
-  
+
+In both examples, explicitly declaring the types has the exact same effect as letting Ceylon infer the types. Both are
+completely type-safe.
+
+
+
 
