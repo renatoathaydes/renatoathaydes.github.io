@@ -1,7 +1,7 @@
-# Ceylon as a powerful data modelling tool
+# Using Ceylon's type system as a powerful modelling tool
 
-Ceylon has a really powerful type system that allows you to model your code's data and behaviour in a
-really advanced way.
+Ceylon has a really powerful type system that allows programmers to express concepts that just are not possible with
+most current type systems out there.
 
 For example, you can express that your method takes a non-empty stream of Strings:
 
@@ -20,6 +20,40 @@ But not like this:
 ```ceylon
 // does not compile!
 take {}
+```
+
+You can say that a function may succeed, fail or just not be able to run:
+
+```ceylon
+Success|Failure|NotRun myFunction(...) { ... }
+```
+
+And the type checker will enforce at compile time that the user of the function checks the result before using it:
+
+```ceylon
+void consumeSuccess(Success success) {}
+void reportFailure(Failure failure) {}
+void maybeRunAgain() {}
+
+Success|Failure|NotRun result = myFunction();
+
+// OK
+switch(result)
+case (is Success) { consumeSuccess(result); }
+case (is Failure) { reportFailure(result); }
+case (is NotRun) { maybeRunAgain(); }
+
+// DOES NOT COMPILE
+consumeSuccess(result);
+```
+
+But let's suppose that `Success`, `Failure` and `NotRun` are all subtypes of a type that has a property
+`displayMessage`. Then, you could call it directly on any instance of `Success|Failure|NotRun` without checking,
+as that would be safe:
+
+```ceylon
+// no problem!
+print(result.displayMessage);
 ```
 
 This is extremely useful!
@@ -112,7 +146,7 @@ function and some arguments just to apply that function to the arguments... why 
 And you'd be right for this toy example... but the thing is, using the same principles we have used so far, we are
 able to create extremely powerful systems that can be extended at will. Don't believe me? Read on!
 
-## Designing a real system just to use the cool stuff
+## Designing an application using the Ceylon type system
 
 Suppose that our goal is to create a web application to present health reports about a population.
 Starting from the viewpoint of what we want users to see, the first thing we need to worry about is, basically,
@@ -127,8 +161,12 @@ renderer takes.
 > The renderer could of course *know* about the actual implementation of the data, but if we did that our code
   would become much more brittle, interconnected and resistant to change!
 
-Once we know how to represent the data and present it to the user, we must also implement some kind of search
-functionality to allow doctors and nurses to see the data in whatever way they want to.
+Once we know how to represent the data and present it to the user, we must put the two together in a *glue* module which
+converts the data into the generic form the renderer can recognize.
+
+We could also add modules to add data persistence, search functionality, data entry and editing etc. but after we've
+implemented the initial modules, it should be clear how the implementation of further functionality should be easy to
+integrate into the system.
 
 ### The renderer
 
@@ -216,6 +254,28 @@ render(header([10, 0.1, true, "hello", [4, 0.4]]), {
 Even the types of the sub-tuples in the example above must match exactly. This is really impressive for a type-system
 to achieve, so please take a moment to appreciate the power of this construct.
 
+One problem with the current use of `render` is that the header is expected to have the same type as the data rows. This
+is obviously wrong... to fix that is a matter of partially separating the types of the items of headers and cells, whilst
+still keeping the length of the types bound together. This can be done as shown below:
+
+```ceylon
+// explicitly give the type of the data
+[[Name, Weight, Height]+] data = [
+    ["John", 72, 1.79],
+    ["Mary", 61, 1.76],
+    ["Ana", 77, 1.89]
+];
+
+// convert the data tuples to string tuples of the same length
+value stringData = data.map((row)
+    => [row[0].string, row[1].string, row[2].string]);
+
+// render the converted tuples... the header length must match the rows' lengths
+render(process.write, 
+    header(["Name", "Weight", "Height"]), 
+    stringData.map(row));
+```
+
 Going back to our problem... we now know how to write an extremely generic renderer. But we just rendered the HTML
 to `sysout`, which is not very useful for a web app... let's fix that by taking as an argument a function which has the
 same signature as `process.write`, which we had used: `Anything(String)`
@@ -257,6 +317,44 @@ if (exists fileHandle) {
 }
 ```
 
+As a final improvement, we should stop using String concatenation to create the HTML page and start using the more
+proper, type-safe tool for the job, which is the `ceylon.html` module!
+
+We also give the type parameter more appropriate names than A, B, C.
+
+```ceylon
+shared void render<Element, First, Rest>(
+    Anything(String) write,
+    InvariantTuple<Element, First, Rest> headers,
+    {InvariantTuple<Element, First, Rest>+} cells) {
+    
+    function asString(Anything item)
+        => item?.string else "?";
+    
+    Html html = Html {
+        doctype = html5;
+        Head {
+            title = "Medical Web";
+        };
+        Body {
+            H1("Medical Web App"),
+            Table {
+                header = headers.tuple.map(asString).map(Th);
+                rows = cells.map((row) => Tr {
+                    row.tuple.map(asString).map(Td)
+                });
+            }
+        };
+    };
+    
+    write(html.string);
+}
+```
+
+This is still a little bit naive... we cannot, for example, include page snippets from different sources... or provide
+a custom CSS stylesheet... but to keep this blog post within a reasonable size, let's move on and see how we can
+represent the data.
+
 ### Representing the data
 
 Health information is something we, programmers, probably don't know much about... you might be able to invite some medical
@@ -270,9 +368,13 @@ As it's probably impossible to know all of these beforehand anyway, let's try to
 model.
 
 I like the idea of having a `Person` class as we can use that to define some mandatory fields which we know must be
-present, like `name` and `dob`, just like we would do in the old-fashioned way... we enforce a few constraints on the
-name field so that patently wrong input is not accepted by our program (maybe the constraints I define are not ideal,
-but that's beyond the point of this blog post).
+present, like `name` and `dob`, just like we would do in the old-fashioned way, at least to start with...
+we enforce a few constraints on the name field so that patently wrong input is not accepted by our program
+(maybe the constraints I define are not ideal, but that's beyond the point of this blog post). We do that with a named
+constructor `createName` which verifies programmatically that the given String meets the constraints. It is a shortcoming
+of the Ceylon type system that it is still not possible to specify a String with a certain length range... that would only
+be possible with [dependent types](https://en.wikipedia.org/wiki/Dependent_type), to my knowledge, but this is still a
+subject of research that no practical language has been able to incorporate (undecidability being a major issue). 
 
 > to use `Date` for the `dob` field, the Ceylon SDK module `ceylon.time` must be imported.
 
@@ -321,23 +423,31 @@ value person3 = Person(FullName {
 Now, we add a new field to `Person` that will make it possible to add new attributes to it without losing type-safety.
 
 ```ceylon
-class Person<out Attribute>(shared FullName fullName, 
-             shared Date dob,
-             shared {Attribute*} attributes = {})
+class Person<out Attribute>(
+        shared FullName fullName, 
+        shared Date dob,
+        shared {Attribute*} attributes = {})
             given Attribute satisfies Object {}
 ```
 
 The generic type parameters ensure that under a module which has certain requirements on the `Person` object, we can
 get a type-safe representation of its attributes.
 
+We limit actual `Attribute` implementation to sub-types of `Object` because we do not want to allow `Null` as a valid
+attribute (which would be the case if we did not bound the type parameter)! We could go a little further and bound
+ `Attribute` to a new interface, say `PersonAttribute`, with `given Attribute satisfies PersonAttribute`, but that
+ seems unnecessary for now.
+
+Let's have a look how at how we can use attributes.
+
 For example, in the `legal` module, we will be interested only in the *legal* attributes of a `Person`, so when we want
 to access that, we must `narrow` the attributes and see if its there:
 
 ```ceylon
 // define the legal module's attributes
-class SocialSecurityNumber(shared actual String string) {}
-class Nationality(shared actual String string) {}
-alias LegalAttributes => [SocialSecurityNumber, Nationality];
+shared class SocialSecurityNumber(shared actual String string) {}
+shared class Nationality(shared actual String string) {}
+shared alias LegalAttributes => [SocialSecurityNumber, Nationality];
 
 // create a person with legal attributes some other module's attributes
 value person4 = Person(FullName(name("Smith")),
@@ -362,24 +472,24 @@ here the unknown type of the other attributes of a `Person` which may be kept by
 
 Even though in Ceylon you almost never need to provide type parameters to functions (because the types are inferred
 from the actual arguments), we need to do it sometimes, as we did when using the `narrow` function, because as it
-takes no arguments, there's no information to infer the type from. By giving an explicit type to the `legalAttributes`
-variable, we allow type inference to do its work so we can avoid declaring the type parameter:
+takes no arguments, there's no information to infer the type from. Of course, the reason this works in Ceylon is that
+Ceylon has reified generics (besides powerful type inference).
+
+We could now define *medical* attributes to a person, so that the `medical.details` module also has its own
+module-specific attributes:
 
 ```ceylon
-{LegalAttributes*} legalAttributes = person4.attributes.narrow();
-```
+shared class Allergies(shared {String*} substances) {
+    string = substances.string;
+}
+shared class KnownConditions(shared {String*} conditions) {
+    string = conditions.string;
+}
+shared class CurrentMedication(shared {String*} medication) {
+    string = medication.string;
+}
 
-Of course, the reason this works in Ceylon is that Ceylon has reified generics (besides powerful type inference).
-
-We could now define *medical* attributes to a person, so that the `medical` module also has its own module-specific
-attributes to work with:
-
-```ceylon
-class Allergies(shared {String*} substances) {}
-class KnownConditions(shared {String*} conditions) {}
-class CurrentMedication(shared {String*} medication) {}
-
-alias MedicalAttributes => [Allergies, KnownConditions, CurrentMedication];
+shared alias MedicalAttributes => [Allergies, KnownConditions, CurrentMedication];
 
 value person4 = Person(FullName(name("Smith")),
     date(1984, 12, 21), {
@@ -388,7 +498,7 @@ value person4 = Person(FullName(name("Smith")),
 });
 
 // using medical attributes
-{MedicalAttributes*} medicalAttributes = person4.attributes.narrow();
+value medicalAttributes = person4.attributes.narrow<MedicalAttributes>();
 
 if (medicalAttributes.size == 1, exists attributes = medicalAttributes.first) {
     value allergies = attributes[0];
@@ -398,8 +508,8 @@ if (medicalAttributes.size == 1, exists attributes = medicalAttributes.first) {
 }
 ```
 
-Note that in the previous examples, two different methods were used to extract information from the
-attributes `Tuple`: in the first, we deconstructed the `Tuple` directly, in the second, we accessed the
+Notice that in the previous examples, two different methods were used to extract information from the
+attributes tuple: in the first, we deconstructed the tuple directly, in the second, we accessed the
 elements we were interested in by index. Unlike in most languages, both are completely type-safe:
 
 ```ceylon
@@ -417,6 +527,190 @@ CurrentMedication currentMedication = attributes[2];
 In both examples, explicitly declaring the types has the exact same effect as letting Ceylon infer the types. Both are
 completely type-safe.
 
+If you attempt to access an index that does not exist, the returned element will be `null`:
 
+```ceylon
+// DOES NOT COMPILE
+CurrentMedication currentMedication = attributes[3];
 
+// OK, but useless
+Null doesNotExist = attributes[3];
+```
 
+This should be enough for us to represent a `Person` quite well, with module-specific attributes making our code
+really modular, while at the same time allowing us to evolve the model in the future much more easily. Just imagine
+that we wanted to change the legal attributes. Not a single module would require changes except for the legal module
+itself, and perhaps any other module that depends on it (legal module extensions?).
+
+Storage of a `Person` instance should be easy with either Ceylon
+[serialization](https://gist.github.com/gavinking/ca2fba39c73d9dc376ee) or the use of a modern document database
+(I would recommend an ACID, scalable document/graph database called [OrientDB](http://orientdb.com/) for that),
+for example.
+
+### Putting everything together
+
+Now that we have a data representation and a renderer function, we can write the glue code necessary to make the two
+work together.
+
+That's quite easy!
+
+First, we need some functions that turn each type we're interested in adding to the report we will show to the user
+into a `String`:
+
+```ceylon
+String renderedName(FullName fullName)
+    => "``fullName.lastName``\
+        ``if (exists fn = fullName.firstName)
+            then (", " + fn.string)
+            else ""``";
+
+String renderedDate(Date date)
+    => date.string; // maybe we should format it on the client's Locale
+
+String renderedSSN(SocialSecurityNumber? ssn)
+    => ssn?.string else "UNKNOWN";
+
+String renderedAllergies(Allergies? allergies)
+    => if (exists a = allergies) then
+            (if (a.substances.empty) then "None"
+             else a.substances.string)
+       else "UNKNOWN";
+
+String renderedMedication(CurrentMedication? medication)
+    => if (exists m = medication) then
+            (if (m.medication.empty) then "None"
+             else m.medication.string)
+       else "UNKNOWN";
+```
+
+In which module each function should be located is left as an exercise to the reader ;)
+
+Now we can define the headers of the table we want to display, as well as the type of the cells which will form the
+rows of the table:
+
+```ceylon
+value headerNames = ["Full name", "Date of birth", "SSN",
+                     "Allergies", "Current Medication"];
+
+alias RenderableRow => [FullName, Date, SocialSecurityNumber?, 
+                        Allergies?, CurrentMedication?];
+```
+
+Each `Person<Anything>` instance needs to be turned into a `RenderableRow`, which our renderer knows how to render:
+
+```ceylon
+RenderableRow personRow(Person<Anything> person) {
+    value legalAttributes = person.attributes.narrow<LegalAttributes>();
+    value medicalAttributes = person.attributes.narrow<MedicalAttributes>();
+    
+    SocialSecurityNumber? ssn = legalAttributes.first?.first else null;
+    
+    [Allergies?, CurrentMedication?] medicalColumns;
+    if (exists attributes = medicalAttributes.first) {
+        medicalColumns = [attributes[0], attributes[2]];
+    } else {
+        medicalColumns = [null, null];
+    }
+    
+    return [person.fullName, person.dob, ssn, *medicalColumns];
+}
+```
+
+Next, we define a function that takes a `{Person<Anything>*}` stream, which would probably come from whatever data store
+we had at our disposal, turn that into a `{RenderableRow*}` stream and, finally, call the `render` function with the
+headers and this stream of rows (if there's at least one row):
+
+```ceylon
+void renderPeople({Person<Anything>*} people) {
+    value data = people.map(personRow)
+            .map((pr) => [renderedName(pr[0]), renderedDate(pr[1]),
+                          renderedSSN(pr[2]), renderedAllergies(pr[3]),
+                          renderedMedication(pr[4])])
+            .map(row);
+
+    if (exists firstRow = data.first) {
+        // idiom to turn a {A*} into a {A+}
+        value nonEmptyData = { firstRow }.chain(data.rest);
+        render(process.write, header(headerNames), nonEmptyData);
+    } else {
+        print("No people were found");
+    }
+}
+```
+
+That's it... we can test this with a small example:
+
+```ceylon
+value person1 = Person {
+    fullName = FullName(name("Smith"));
+    dob = date(1984, 12, 21);
+    attributes = [
+        [SocialSecurityNumber("555-555-xxx"), Nationality("New Zealand")],
+        [Allergies {"peanuts"}, KnownConditions {}, CurrentMedication {}]
+    ];
+};
+
+value person2 = Person {
+    fullName = FullName {
+        firstName = name("Michael");
+        lastName = name("Jordan");
+    };
+    dob = date(1963, 2, 17);
+    attributes = [
+        [SocialSecurityNumber("555-555-yyy"), Nationality("USA")],
+        [Allergies {}, KnownConditions {}, CurrentMedication {"Naproxen"}]
+    ];
+};
+
+renderPeople { person1, person2 };
+```
+
+### Extending the system
+
+Now that we've got a working system, just as in real life, we would probably want to extend the system pretty much
+as soon as we were done with the initial design. That's when you'll know whether you succeeded in making your
+system change-friendly.
+
+Let's see how the system we have designed so far accommodates change.
+
+Our next objective is to add computed values to the report. Computed values are calculated based on existing attributes
+of a person.
+
+The `bmi` and `overweight` functions we saw in the beginning of this post are examples of computed values:
+
+```ceylon
+function bmi(Kilogram weight, Meter height)
+        => weight.float / (height ^ 2.0);
+
+function overweight(Kilogram weight, Meter height)
+        => bmi(weight, height) > 25.0;
+```
+
+To add support for these values, first we need to add a new module called `medical.measurement`, which will contain
+the functions above (with the return type explicitly declared, as that's mandatory in Ceylon for `shared` functions)
+as well as a new attribute to be added to `Person`:
+
+```ceylon
+shared alias Kilogram => Integer;
+shared alias Meter => Float;
+
+shared class Measurements(
+    shared Kilogram weight,
+    shared Meter height) {
+
+    shared [Kilogram, Meter] properties = [weight, height];
+
+}
+
+shared Float bmi(Kilogram weight, Meter height)
+        => weight.float / (height ^ 2.0);
+
+shared Boolean overweight(Kilogram weight, Meter height)
+        => bmi(weight, height) > 25.0;
+```
+
+Now we can use this in the web module:
+
+```ceylon
+
+```
