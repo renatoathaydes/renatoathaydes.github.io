@@ -1,7 +1,7 @@
-# Using Ceylon's type system as a powerful modelling tool
+# Writing code that works with the help of the type system
 
-Ceylon has a really powerful type system that allows programmers to express concepts that just are not possible with
-most current type systems out there.
+Ceylon has a really powerful type system that allows programmers to express concepts that are just impossible with
+most other type systems.
 
 For example, you can express that your method takes a non-empty stream of Strings:
 
@@ -22,58 +22,89 @@ But not like this:
 take {}
 ```
 
-You can say that a function may succeed, fail or just not be able to run:
+A possibly empty stream of Strings would be `{String*}` rather than `{String+}`.
+
+You can express optional types:
 
 ```ceylon
-Success|Failure|NotRun myFunction(...) { ... }
+String? name = null;
+Integer? age = 34;
 ```
 
-And the type checker will enforce at compile time that the user of the function checks the result before using it:
+But this is probably not what you're thinking! `String?` just means `String|Null`, ie. a type formed by the union of
+the types `String` and `Null`. You could just as well have a union like `String|Integer`, or
+`Error|Success<Result?>` for the return value of a function that can fail or succeed with or without a result.
+
+The only things special about so-called optional types in Ceylon are the `?` syntax sugar for unions with `Null`,
+besides a convenience operator, `exists`, which is just short for `is Null`:
 
 ```ceylon
-void consumeSuccess(Success success) {}
-void reportFailure(Failure failure) {}
-void maybeRunAgain() {}
-
-Success|Failure|NotRun result = myFunction();
-
-// OK
-switch(result)
-case (is Success) { consumeSuccess(result); }
-case (is Failure) { reportFailure(result); }
-case (is NotRun) { maybeRunAgain(); }
-
-// DOES NOT COMPILE
-consumeSuccess(result);
+String? name = null;
+if (exists name) {
+    // here, name has type String, not String?
+    print("Length of name is ``name.size``");
+}
 ```
 
-But let's suppose that `Success`, `Failure` and `NotRun` are all subtypes of a type that has a property
-`displayMessage`. Then, you could call it directly on any instance of `Success|Failure|NotRun` without checking,
-as that would be safe:
+You can also make use of reified generics, as in the following example:
 
 ```ceylon
-// no problem!
-print(result.displayMessage);
+{Error|Success<Result?>*} results = ...
+
+{Result*} successes = results.narrow<Success<Result?>>()*.result.coalesced;
 ```
 
-This is extremely useful!
+In the above example, the `narrow` method is used to obtain a stream containing only items that are assignable to
+the type of the type parameter, `Success<Result?>`... the spread (`*`) operator is used to call a property `result`
+on each item of the stream, resulting in a stream of `Result?`.
 
-Here's another example of the power of Ceylon's type system.
+The `coalesced` property of a stream returns the stream with all `null` values filtered out. It's the same as
+calling `stream.narrow<Object>()`, because the only concrete type that is not a sub-type of `Object` is `Null`.
 
-Imagine a function `assess` that takes a couple of variables,
-say a person's weight and height ( of types `Float` and `Integer`, respectively)
-and a predicate function whose parameters are also of type `Float` and `Integer` and that
-returns a `Boolean`... examples of such a predicate function may be `overweight`
-or `inRiskGroup` (these should probably return a probability or some other graded assessment,
-but let's try to keep it simple for now).
-
-Here's the `assess` function written in Ceylon:
+To make code that uses complex types more readable, it is common to use type aliases. For example, the code above could
+be re-written like this:
 
 ```ceylon
-Boolean assess([Integer, Float] weightHeight, 
-               Boolean(Integer, Float) predicate)
-                => predicate(*weightHeight);
+alias Successful => Success<Result?>;
+alias Outcome => Error|Successful;
+    
+{Result*} successes = results.narrow<Successful>()*.result.coalesced;
 ```
+
+This is getting interesting. Let's see what else we can do.
+
+One very unique feature of Ceylon is its implementation of tuples. They are definitely **not** the same you've probably
+seen before in older languages, with hacks like `Tuple1`, `Tuple2` etc. up to some completely arbitrary limit. In fact,
+Tuples can be effectively infinite in Ceylon:
+
+```ceylon
+value stringAndInt = ["hi", 1];
+
+[String, Integer+] stringAndInts = ["hi", 1, 2, 3, 4, 5, 6];
+
+[Integer*] ints = [1, 2, 3];
+
+[String, Integer*] stringsAndInts2 = ["hi", *ints];
+```
+
+Do you think that's cool? Then check this out:
+
+```ceylon
+value myTuple = [1, 0.1, "one", ['o', 'n', 'e']];
+
+Integer ione = myTuple[0];
+Float fone = myTuple[1];
+String sone = myTuple[2];
+[Character+] cone = myTuple[3];
+```
+
+Or, equivalently:
+
+```ceylon
+value [ione, fone, sone, cone] = myTuple;
+```
+
+All of the above is completely type-safe.
 
 To avoid making mistakes with measurement units, let's give the types some more specific names:
 
@@ -81,21 +112,11 @@ To avoid making mistakes with measurement units, let's give the types some more 
 alias Kilogram => Integer;
 alias Meter => Float;
 
-Boolean assess([Kilogram, Meter] weightHeight, 
-               Boolean(Kilogram, Meter) predicate)
-                => predicate(*weightHeight);
-```
-
-We could use this function like this:
-
-```ceylon
-function bmi(Kilogram weight, Meter height)
+Float bmi(Kilogram weight, Meter height)
         => weight.float / (height ^ 2.0);
 
-function overweight(Kilogram weight, Meter height)
+Boolean overweight(Kilogram weight, Meter height)
         => bmi(weight, height) > 25.0;
-
-value needToDiet = assess([82, 1.74], overweight);
 ```
 
 Well, that's pretty cool already... a function can take any other function as an argument...
@@ -638,7 +659,7 @@ void renderPeople({Person<Anything>*} people) {
 }
 ```
 
-That's it... we can test this with a small example:
+That's it... we can test the code with a small example:
 
 ```ceylon
 value person1 = Person {
@@ -662,14 +683,55 @@ value person2 = Person {
     ];
 };
 
-renderPeople { person1, person2 };
+renderPeople {person1, person2};
+```
+
+Which prints this:
+
+```html
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Medical Web</title>
+</head>
+<body>
+<h1>Medical Web App</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Full name</th>
+        <th>Date of birth</th>
+        <th>SSN</th>
+        <th>Allergies</th>
+        <th>Current Medication</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Smith</td>
+        <td>1984-12-21</td>
+        <td>555-555-xxx</td>
+        <td>{ peanuts }</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Jordan, Michael</td>
+        <td>1963-02-17</td>
+        <td>555-555-yyy</td>
+        <td>None</td>
+        <td>{ Naproxen }</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
 ```
 
 ### Extending the system
 
-Now that we've got a working system, just as in real life, we would probably want to extend the system pretty much
-as soon as we were done with the initial design. That's when you'll know whether you succeeded in making your
-system change-friendly.
+Now that we've got a reasonably working system, we would probably want to extend the system.
+That's when you'll know whether you succeeded in making your system change-friendly.
 
 Let's see how the system we have designed so far accommodates change.
 
@@ -677,14 +739,6 @@ Our next objective is to add computed values to the report. Computed values are 
 of a person.
 
 The `bmi` and `overweight` functions we saw in the beginning of this post are examples of computed values:
-
-```ceylon
-function bmi(Kilogram weight, Meter height)
-        => weight.float / (height ^ 2.0);
-
-function overweight(Kilogram weight, Meter height)
-        => bmi(weight, height) > 25.0;
-```
 
 To add support for these values, first we need to add a new module called `medical.measurement`, which will contain
 the functions above (with the return type explicitly declared, as that's mandatory in Ceylon for `shared` functions)
@@ -709,8 +763,196 @@ shared Boolean overweight(Kilogram weight, Meter height)
         => bmi(weight, height) > 25.0;
 ```
 
-Now we can use this in the web module:
+Now we can use this in the web module. We add the new field `overweight` to the headers and row definitions:
 
 ```ceylon
+alias Overweight => Boolean;
+
+value headerNames = ["Full name", "Date of birth", "SSN",
+                     "Overweight", "Allergies", "Current Medication"];
+
+
+alias RenderableRow => [FullName, Date, SocialSecurityNumber?, 
+                        Overweight?, Allergies?, CurrentMedication?];
+```
+
+Once we do that, all the code used to create the table data will not compile anymore, as the types will be wrong!
+This is really good. We just can't get this wrong. The type system won't let us!
+
+Now we just need to fix the errors the compiler complains about. First, the `personRow` function now returns something
+that does not match the type `RenderableRow`, which it should return... what the compiler says is:
+
+```ceylon
+Returned expression must be assignable to return type of personRow:
+[FullName, Date, SocialSecurityNumber?, Allergies?, CurrentMedication?] is not assignable to
+RenderableRow ([FullName, Date, SocialSecurityNumber?, Boolean?, Allergies?, CurrentMedication?])
+```
+
+Reading the error above carefully, we notice that the expected type has the `Boolean?` item which is missing in the
+actualy type (would be nice if the compiler told us the alias `Overweight?` was missing!!). That's still quite helpful.
+
+So let's add the new value to each row:
+
+```ceylon
+RenderableRow personRow(Person<Anything> person) {
+    value legalAttributes = person.attributes.narrow<LegalAttributes>();
+    value medicalAttributes = person.attributes.narrow<MedicalAttributes>();
+    
+    SocialSecurityNumber? ssn = legalAttributes.first?.first else null;
+        
+    // **New attribute**
+    value measurementAttributes = person.attributes.narrow<Measurements>();
+    Measurements? measurements = measurementAttributes.first;
+    value personOverweight = if (exists measurements)
+                            then overweight(*measurements.properties)
+                            else null;
+    
+    [Allergies?, CurrentMedication?] medicalColumns;
+    if (exists attributes = medicalAttributes.first) {
+        medicalColumns = [attributes[0], attributes[2]];
+    } else {
+        medicalColumns = [null, null];
+    }
+    
+    // **added personOverweight to the returned tuple!**
+    return [person.fullName, person.dob, ssn, personOverweight, *medicalColumns];
+}
+```
+
+The only thing that still does not compile is the `renderPeople` function... the error is on the call to `render`:
+the headers and cells's types no longer match... there's one cell column missing!
+
+In the words of the compiler:
 
 ```
+Argument must be assignable to parameter headers of render:
+InvariantTuple<String,String,String[5]> is not assignable to
+InvariantTuple<String,String,String[5]|String[4]>
+```
+
+This error is quite interesting... it shows that Ceylon's type inference tried to actually make the types match by
+*assuming* that the correct type is that of the cells, so the header must be wrong... it says that the actual type of
+header, `InvariantTuple<String,String,String[5]>` (which has one String followed by another 5), is not assignable to
+the expected type, `InvariantTuple<String,String,String[5]|String[4]>` (which was inferred to be an union of a tuple with
+6 Strings, and one with 5). Because the actual type is an instance of only one of the types in the union, the compiler
+could not *make it work*!
+
+But we can make it work by just adding the new column to the data:
+
+```ceylon
+// one more render function for the new column
+String renderedOverweight(Boolean? overweight)
+    => if (exists o = overweight) then
+            (if (o) then "True"
+             else "False")
+       else "UNKNOWN";
+
+void renderPeople({Person<Anything>*} people) {
+
+    // here, notice how we add a new column to the data!
+    value data = people.map(personRow)
+            .map((pr) => [renderedName(pr[0]), renderedDate(pr[1]),
+                          renderedSSN(pr[2]), renderedOverweight(pr[3]),
+                          renderedAllergies(pr[4]),
+                          renderedMedication(pr[5])])
+            .map(row);
+
+    // nothing else was changed!!
+    if (exists firstRow = data.first) {
+        // idiom to turn a {A*} into a {A+}
+        value nonEmptyData = { firstRow }.chain(data.rest);
+        render(process.write, header(headerNames), nonEmptyData);
+    } else {
+        print("No people were found");
+    }
+}
+```
+
+Now everything compiles, and we can be quite safe that our modifications have worked, and that we did not forget to
+add the new column anywhere! If we did, we can be certain that the compiler would yell at us.
+
+Ah, actually there's one more place we need to change... the examples of `Person` we had to test our code!
+
+The compiler did not tell us about it because we made the `Measurements` attributes of `Person` optional!
+We could easily make them mandatory, and I hope you will be able to figure out how... but to make sure our current
+code works, let's add measurements to one of the people and see what gets printed:
+
+```ceylon
+value person1 = Person {
+    fullName = FullName(name("Smith"));
+    dob = date(1984, 12, 21);
+    attributes = [
+        [SocialSecurityNumber("555-555-xxx"), Nationality("New Zealand")],
+        [Allergies {"peanuts"}, KnownConditions {}, CurrentMedication {}]
+    ];
+};
+
+value person2 = Person {
+    fullName = FullName {
+        firstName = name("Michael");
+        lastName = name("Jordan");
+    };
+    dob = date(1963, 2, 17);
+    attributes = [
+        [SocialSecurityNumber("555-555-yyy"), Nationality("USA")],
+        [Allergies {}, KnownConditions {}, CurrentMedication {"Naproxen"}],
+        Measurements { weight = 98; height = 1.98; }
+    ];
+};
+```
+
+Running it gives:
+
+```html
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Medical Web</title>
+</head>
+<body>
+<h1>Medical Web App</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Full name</th>
+        <th>Date of birth</th>
+        <th>SSN</th>
+        <th>Overweight</th>
+        <th>Allergies</th>
+        <th>Current Medication</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Smith</td>
+        <td>1984-12-21</td>
+        <td>555-555-xxx</td>
+        <td>UNKNOWN</td>
+        <td>{ peanuts }</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Jordan, Michael</td>
+        <td>1963-02-17</td>
+        <td>555-555-yyy</td>
+        <td>False</td>
+        <td>None</td>
+        <td>{ Naproxen }</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
+```
+
+Not that we needed to run this to know it would work! Well, maybe I'm being a little too radical now... but I hope
+you agree that's a pretty comfortable position you find yourself in when your compiler can catch so many errors for
+you, making it pretty difficult to mess things up!
+
+There's a lot more to the Ceylon type system and this only scratches the surface. I hope to write more about this in
+the future and that you're now at least curious to try out this incredible language, if you haven't done that yet...
+and if you have, I hope you've learned some new tricks.
+
+Let me know what you think on [Reddit]().
+
