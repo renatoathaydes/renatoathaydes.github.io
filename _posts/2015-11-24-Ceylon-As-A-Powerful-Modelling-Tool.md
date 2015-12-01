@@ -73,17 +73,28 @@ alias Outcome => Error|Successful;
 
 This is getting interesting. Let's see what else we can do.
 
-One very unique feature of Ceylon is its implementation of tuples. They are definitely **not** the same you've probably
-seen before in older languages, with hacks like `Tuple1`, `Tuple2` etc. up to some completely arbitrary limit. In fact,
-Tuples can be effectively infinite in Ceylon:
+One very unique feature of Ceylon is its [implementation of tuples](http://ceylon-lang.org/documentation/1.0/tour/sequences/).
+They are **not** the same you've probably seen before in older languages, with hacks like `Tuple1`, `Tuple2` etc.
+up to some completely arbitrary limit.
+
+In fact, tuples can have any size, or even be effectively infinite in Ceylon:
 
 ```ceylon
+// using type-inference, the type is [String, Integer]
 value stringAndInt = ["hi", 1];
 
-[String, Integer+] stringAndInts = ["hi", 1, 2, 3, 4, 5, 6];
+// explicitly giving a type - may narrow the type, as in this example
+// (the principal type would be [String, Integer, Integer, Integer])
+[String, Integer+] stringAndInts = ["hi", 1, 2, 3];
 
-[Integer*] ints = [1, 2, 3];
+// tuple of one or more integers
+[Integer, Integer*] ints = [1, 2, 3];
 
+// another way to declare a tuple of one or more integers
+[Integer+] ints = [1, 2, 3];
+
+// we can use a tuple to create another tuple, even in the case of ints,
+// where the length is unknown (from its type, that is)
 [String, Integer*] stringsAndInts2 = ["hi", *ints];
 ```
 
@@ -92,21 +103,37 @@ Do you think that's cool? Then check this out:
 ```ceylon
 value myTuple = [1, 0.1, "one", ['o', 'n', 'e']];
 
-Integer ione = myTuple[0];
-Float fone = myTuple[1];
-String sone = myTuple[2];
-[Character+] cone = myTuple[3];
+Integer first = myTuple[0];
+Float second = myTuple[1];
+String third = myTuple[2];
+Character[3] fourth = myTuple[3];
 ```
 
 Or, equivalently:
 
 ```ceylon
-value [ione, fone, sone, cone] = myTuple;
+value [first, second, third, fourth] = myTuple;
 ```
 
-All of the above is completely type-safe.
+All of the above is completely type-safe. If you got the indexes wrong in the first example, it wouldn't compile!
 
-To avoid making mistakes with measurement units, let's give the types some more specific names:
+In the last example above, each variable takes the exact type of the item in the respective position in the tuple...
+you could have written it like shown below, to make the types blatantly clear (but really verbose):
+
+```ceylon
+// explicit types may be declared in deconstructing a tuple
+value [Integer first, Float second, String third, Character[3] fourth] = myTuple;
+```
+
+And in case you're wondering, no, the types cannot be mis-matched if this program compiles. If you say the second item
+is a `Float` but it is actually a `Integer`, the program won't compile at all. So letting Ceylon infer the types is
+usually the best thing to do, as it can do it better than you can most of the time.
+
+Now, for a more practical example, imagine we have some useful functions, such as a function that calculates whether
+you're overweight or not based on your weight and height *(I cannot attest to whether this function is realistic,
+but I copied the formula and definition from a 
+[health website](http://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html)
+that looks legit to me)*:
 
 ```ceylon
 alias Kilogram => Integer;
@@ -119,68 +146,50 @@ Boolean overweight(Kilogram weight, Meter height)
         => bmi(weight, height) > 25.0;
 ```
 
-Well, that's pretty cool already... a function can take any other function as an argument...
-you can *spread* the elements of a Tuple (using the `*` spread operator) to call a function which
-takes those elements... nice... but we can go even further in Ceylon!
-
-We could make the `assess` function return whatever type the `predicate` function happens to return
-(as the function may not be a predicate anymore, we also need to rename it to something more general,
-like `fun`):
+If you have a tuple of the right type, you can call this function (or any other with the same argument types) with the
+tuple as an argument directly by using the `*` operator:
 
 ```ceylon
-Result assess<Result>([Integer, Float] weightHeight, 
-                      Result(Integer, Float) fun)
-                        => fun(*weightHeight);
+[Kilogram, Meter] personData = [72, 1.79];
+
+Boolean overweightPerson = overweight(*personData);
 ```
 
-Easy enough with the use of generics. But why stop here? The `assess` function does not really care much
-about the type of `fun`'s arguments as long as the types are the same as those of the `weightHeight` Tuple.
-So let's remove that unnecessary type restriction (and rename `weightHeight` to a very generic `variables`):
+Here, we have a hint about the relationship between
+[tuples and functions](http://ceylon-lang.org/blog/2013/01/21/abstracting-over-functions/),
+which is one of the most interesting points about Ceylon!
 
-```ceylon
-Result assess<Result, Args>(
-        Args variables, 
-        Callable<Result, Args> fun)
-            given Args satisfies Anything[]
-            => fun(*variables);
+With a little trick which I will demonstrate a little bit later on, tuples allow us to even write function that
+demand tuple arguments of the same length, so that it becomes possible to express the type of functions such as the
+one below (in pseudo-code... keep reading to see how the real one is implemented):
+
+```
+void render(<tuple of n elements> header, {<tuple of n elements>*} rows) => ...;
 ```
 
-Now we can use `assess` with type-safety over functions of absolutely any type:
+Extremely useful!
 
-```ceylon
-// some example functions
-function hi() => null;
-function hello(String name) => print("Hello ``name``");
-function bye(String* names) => names.collect(
-    (name) => print("Hello ``name``"));
+But enough of theory for now! The point of this blog post is to show how the niceties of the Ceylon type system
+actually allow us to write better, more reliable applications in the real world! To do that, I see no better way than
+to actually design an application in Ceylon... not all parts of it, of course, but enough to demonstrate how
+a full system designed with the protection of a sane type system can be incredibly robust... and at the same time
+fun (and fast) to do!
 
-// assess will take any function, as long as the arguments types match
-assess([], hi);
-assess(["John"], hello);
-assess([], bye);
-assess(["Mary", "Adam"], bye);
-```
+## Designing a type-safe application that is as flexible as it needs to be
 
-Great! But I'm sure many of you are asking yourselves what's the point of writing a function that takes another
-function and some arguments just to apply that function to the arguments... why not just apply the function directly?
+Suppose that our goal is to create a web application to present health reports about patients in a hospital.
 
-And you'd be right for this toy example... but the thing is, using the same principles we have used so far, we are
-able to create extremely powerful systems that can be extended at will. Don't believe me? Read on!
-
-## Designing an application using the Ceylon type system
-
-Suppose that our goal is to create a web application to present health reports about a population.
 Starting from the viewpoint of what we want users to see, the first thing we need to worry about is, basically,
 how the data will be presented.
 
 The obvious choice is to present the data in HTML so that users can see it right in their browsers, so let's start by
-implementing a renderer that does that.
+implementing a renderer that does that. Later, we should be able to add other renderers as required.
 
 We also need the concrete representation of the data, of course, which will need to be translated into whatever the
 renderer takes.
 
-> The renderer could of course *know* about the actual implementation of the data, but if we did that our code
-  would become much more brittle, interconnected and resistant to change!
+> The renderer could, of course, *know* about the actual implementation of the data, but if we did that our code
+  would become much more brittle, interconnected and resistant to change! So let's not...
 
 Once we know how to represent the data and present it to the user, we must put the two together in a *glue* module which
 converts the data into the generic form the renderer can recognize.
@@ -191,12 +200,12 @@ integrate into the system.
 
 ### The renderer
 
-So we write a little module that creates HTML based on some input. Creating HTML nowadays is
+We start by writing a little module that creates HTML based on some input. Creating HTML nowadays is
 [easy](https://modules.ceylon-lang.org/repo/1/ceylon/html/1.2.0/module-doc/api/index.html).
 The real problem to be solved is how to represent the input so that our renderer module is able to have an abstract
 representation of it, while being flexible enough to accept changes in the input without requiring modifications.
 
-One way to solve our problem is to decide on just how general we can make our input look like while still being able
+One way to solve our problem is to decide on just how general we can make our input look while still being able
 to render it in HTML in an appropriate manner. We could attempt to model the data as a table, for example.
 So our requirements from the data would be just that it should have some headers, with the actual data following
 below them, much like a CSV file or a HTML table.
@@ -205,9 +214,9 @@ Notice that we don't need to care about what those headers will be, or even how 
 that **each row of the table has the same number of elements as the header**! This is nearly impossible to guarantee at
 the type-system level in almost any language out there... however, in Ceylon we actually can!
 
-To achieve that, the first thing we need is a little `Tuple` wrapper to makes the type parameters of `Tuple` *invariant*.
+To achieve that, the first thing we need is a little `Tuple` wrapper that makes the type parameters of `Tuple` *invariant*.
 This is necessary to force the arguments of the `render` function that we will define below to acquire the
-exact same type, not a union between the types of each argument!
+exact same type, not a union between the types, of each argument!
 
 ```ceylon
 class InvariantTuple<Element, First, Rest>(
@@ -731,6 +740,10 @@ Which prints this:
 ### Extending the system
 
 Now that we've got a reasonably working system, we would probably want to extend the system.
+
+> Extending a system that was badly designed is usually the primary cause of apparently good systems turning into
+  [big balls of mud](https://en.wikipedia.org/wiki/Big_ball_of_mud).
+
 That's when you'll know whether you succeeded in making your system change-friendly.
 
 Let's see how the system we have designed so far accommodates change.
@@ -954,5 +967,5 @@ There's a lot more to the Ceylon type system and this only scratches the surface
 the future and that you're now at least curious to try out this incredible language, if you haven't done that yet...
 and if you have, I hope you've learned some new tricks.
 
-Let me know what you think on [Reddit]().
+Let me know what you think.
 
