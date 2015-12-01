@@ -36,7 +36,7 @@ the types `String` and `Null`. You could just as well have a union like `String|
 `Error|Success<Result?>` for the return value of a function that can fail or succeed with or without a result.
 
 The only things special about so-called optional types in Ceylon are the `?` syntax sugar for unions with `Null`,
-besides a convenience operator, `exists`, which is just short for `is Null`:
+besides a convenience operator, `exists`, which is just short for `is Object` (or `!is Null`):
 
 ```ceylon
 String? name = null;
@@ -159,7 +159,7 @@ Here, we have a hint about the relationship between
 [tuples and functions](http://ceylon-lang.org/blog/2013/01/21/abstracting-over-functions/),
 which is one of the most interesting points about Ceylon!
 
-With a little trick which I will demonstrate a little bit later on, tuples allow us to even write function that
+With a little trick which I will demonstrate a little bit later on, tuples allow us to even write functions that
 demand tuple arguments of the same length, so that it becomes possible to express the type of functions such as the
 one below (in pseudo-code... keep reading to see how the real one is implemented):
 
