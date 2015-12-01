@@ -1,4 +1,4 @@
-# Writing code that works with the help of the type system
+# Enlisting the power of Ceylon's type system to write reliable software
 
 Ceylon has a really powerful type system that allows programmers to express concepts that are just impossible with
 most other type systems.
