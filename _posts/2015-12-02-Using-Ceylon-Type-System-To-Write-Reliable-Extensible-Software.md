@@ -13,31 +13,31 @@ most other type systems.
 
 For example, you can express that your method takes a non-empty stream of Strings:
 
-```ceylon
+{% highlight ceylon %}
 void take({String+} s) {}
-```
+{% endhighlight %}
 
 Which you can call like this:
 
-```ceylon
+{% highlight ceylon %}
 take { "a", "b", "c" };
-```
+{% endhighlight %}
 
 But not like this:
 
-```ceylon
+{% highlight ceylon %}
 // does not compile!
 take {}
-```
+{% endhighlight %}
 
 A possibly empty stream of Strings would be `{String*}` rather than `{String+}`.
 
 You can express optional types:
 
-```ceylon
+{% highlight ceylon %}
 String? name = null;
 Integer? age = 34;
-```
+{% endhighlight %}
 
 But this is probably not what you're thinking! `String?` just means `String|Null`, ie. a type formed by the union of
 the types `String` and `Null`. You could just as well have a union like `String|Integer`, or
@@ -46,21 +46,21 @@ the types `String` and `Null`. You could just as well have a union like `String|
 The only things special about so-called optional types in Ceylon are the `?` syntax sugar for unions with `Null`,
 besides a convenience operator, `exists`, which is just short for `is Object` (or `!is Null`):
 
-```ceylon
+{% highlight ceylon %}
 String? name = null;
 if (exists name) {
     // here, name has type String, not String?
     print("Length of name is ``name.size``");
 }
-```
+{% endhighlight %}
 
 You can also make use of reified generics, as in the following example:
 
-```ceylon
+{% highlight ceylon %}
 {Error|Success<Result?>*} results = ...
 
 {Result*} successes = results.narrow<Success<Result?>>()*.result.coalesced;
-```
+{% endhighlight %}
 
 In the above example, the `narrow` method is used to obtain a stream containing only items that are assignable to
 the type of the type parameter, `Success<Result?>`... the spread (`*`) operator is used to call a property `result`
@@ -72,12 +72,12 @@ calling `stream.narrow<Object>()`, because the only concrete type that is not a 
 To make code that uses complex types more readable, it is common to use type aliases. For example, the code above could
 be re-written like this:
 
-```ceylon
+{% highlight ceylon %}
 alias Successful => Success<Result?>;
 alias Outcome => Error|Successful;
     
 {Result*} successes = results.narrow<Successful>()*.result.coalesced;
-```
+{% endhighlight %}
 
 This is getting interesting. Let's see what else we can do.
 
@@ -87,7 +87,7 @@ up to some completely arbitrary limit.
 
 In fact, tuples can have any size, or even be effectively infinite in Ceylon:
 
-```ceylon
+{% highlight ceylon %}
 // using type-inference, the type is [String, Integer]
 value stringAndInt = ["hi", 1];
 
@@ -104,34 +104,34 @@ value stringAndInt = ["hi", 1];
 // we can use a tuple to create another tuple, even in the case of ints,
 // where the length is unknown (from its type, that is)
 [String, Integer*] stringsAndInts2 = ["hi", *ints];
-```
+{% endhighlight %}
 
 Do you think that's cool? Then check this out:
 
-```ceylon
+{% highlight ceylon %}
 value myTuple = [1, 0.1, "one", ['o', 'n', 'e']];
 
 Integer first = myTuple[0];
 Float second = myTuple[1];
 String third = myTuple[2];
 Character[3] fourth = myTuple[3];
-```
+{% endhighlight %}
 
 Or, equivalently:
 
-```ceylon
+{% highlight ceylon %}
 value [first, second, third, fourth] = myTuple;
-```
+{% endhighlight %}
 
 All of the above is completely type-safe. If you got the indexes wrong in the first example, it wouldn't compile!
 
 In the last example above, each variable takes the exact type of the item in the respective position in the tuple...
 you could have written it like shown below, to make the types blatantly clear (but really verbose):
 
-```ceylon
+{% highlight ceylon %}
 // explicit types may be declared in deconstructing a tuple
 value [Integer first, Float second, String third, Character[3] fourth] = myTuple;
-```
+{% endhighlight %}
 
 And in case you're wondering, no, the types cannot be mis-matched if this program compiles. If you say the second item
 is a `Float` but it is actually a `Integer`, the program won't compile at all. So letting Ceylon infer the types is
@@ -143,7 +143,7 @@ but I copied the formula and definition from a
 [health website](http://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html)
 that looks legit to me)*:
 
-```ceylon
+{% highlight ceylon %}
 alias Kilogram => Integer;
 alias Meter => Float;
 
@@ -152,16 +152,16 @@ Float bmi(Kilogram weight, Meter height)
 
 Boolean overweight(Kilogram weight, Meter height)
         => bmi(weight, height) > 25.0;
-```
+{% endhighlight %}
 
 If you have a tuple of the right type, you can call this function (or any other with the same argument types) with the
 tuple as an argument directly by using the `*` operator:
 
-```ceylon
+{% highlight ceylon %}
 [Kilogram, Meter] personData = [72, 1.79];
 
 Boolean overweightPerson = overweight(*personData);
-```
+{% endhighlight %}
 
 Here, we have a hint about the relationship between
 [tuples and functions](http://ceylon-lang.org/blog/2013/01/21/abstracting-over-functions/),
@@ -226,14 +226,14 @@ To achieve that, the first thing we need is a little `Tuple` wrapper that makes 
 This is necessary to force the arguments of the `render` function that we will define below to acquire the
 exact same type, not a union between the types, of each argument!
 
-```ceylon
+{% highlight ceylon %}
 class InvariantTuple<Element, First, Rest>(
     shared Tuple<Element, First, Rest> tuple) {}
-```
+{% endhighlight %}
 
 And a trivial implementation of a `render` function that takes a single header and a non-empty stream of rows:
 
-```ceylon
+{% highlight ceylon %}
 void render<A, B, C>(InvariantTuple<A, B, C> headers, 
                      {InvariantTuple<A, B, C>+} cells) {
     process.write("<table><thead>");
@@ -244,7 +244,7 @@ void render<A, B, C>(InvariantTuple<A, B, C> headers,
         => process.write("<td>``item else "?"``</td>")));
     process.write("</tbody></table>");
 }
-```
+{% endhighlight %}
 
 > We want a non-empty stream of rows so that we don't need to worry about rendering empty tables... a different renderer
   should be used just to render empty tables so that we can have fine control over an empty table representation.
@@ -255,7 +255,7 @@ void render<A, B, C>(InvariantTuple<A, B, C> headers,
 So if we try to call `render` with Tuples of different length, the compiler will not accept our code.
 Even if one of the columns has a value of wrong type, the compiler will stop us on our tracks!
 
-```ceylon
+{% highlight ceylon %}
 // (unfortunately, this definition of row and header only works with the JavaScript back-end
 // because Ceylon 1.2 does not support function types in the JVM).
 // In the JVM, row and header must be normal functions that create an InvariantTuple explicitly.
@@ -279,15 +279,15 @@ render(header(["weight", "height"]), {
      row(["82", "1.82"]),
      row(["63", 1.74]) // cell has wrong type
 });
-```
+{% endhighlight %}
 
 Notice that this generalizes to any number of elements, of any type:
 
-```ceylon
+{% highlight ceylon %}
 render(header([10, 0.1, true, "hello", [4, 0.4]]), {
     row([2, 0.2, false, "bye", [3, 0.3]])
 });
-```
+{% endhighlight %}
 
 Even the types of the sub-tuples in the example above must match exactly. This is really impressive for a type-system
 to achieve, so please take a moment to appreciate the power of this construct.
@@ -296,7 +296,7 @@ One problem with the current use of `render` is that the header is expected to h
 is obviously wrong... to fix that is a matter of partially separating the types of the items of headers and cells, whilst
 still keeping the length of the types bound together. This can be done as shown below:
 
-```ceylon
+{% highlight ceylon %}
 // explicitly give the type of the data
 [[Name, Weight, Height]+] data = [
     ["John", 72, 1.79],
@@ -312,14 +312,14 @@ value stringData = data.map((row)
 render(process.write, 
     header(["Name", "Weight", "Height"]), 
     stringData.map(row));
-```
+{% endhighlight %}
 
 Going back to our problem... we now know how to write an extremely generic renderer. But we just rendered the HTML
 to `sysout`, which is not very useful for a web app... let's fix that by taking as an argument a function which has the
 same signature as `process.write`, which we had used: `Anything(String)`
 (in other words, a function that takes a `String` and returns whatever, including void):
 
-```ceylon
+{% highlight ceylon %}
 void render<A, B, C>(Anything(String) write,
                      InvariantTuple<A, B, C> headers, 
                      {InvariantTuple<A, B, C>*} cells) {
@@ -331,11 +331,11 @@ void render<A, B, C>(Anything(String) write,
         => write("<td>``item else "?"``</td>")));
     write("</tbody></table>");
 }
-```
+{% endhighlight %}
 
 Now, the caller decides whether to print the HTML to `sysout` or stream it down a `socket` or `file`.
 
-```ceylon
+{% highlight ceylon %}
 // just render to sysout (console in JS)
 render(process.write, header(["weight", "height"]), {
      row(["82", "1.82"]),
@@ -353,7 +353,7 @@ if (exists fileHandle) {
         row([2, 0.2, false, "bye", [3, 0.3]])
     });
 }
-```
+{% endhighlight %}
 
 As a final improvement, we should stop using String concatenation to create the HTML page and start using the more
 proper, type-safe tool for the job, which is the `ceylon.html` module!
@@ -362,7 +362,7 @@ We also give the type parameter more appropriate names than A, B, C... and, as s
 [Ceylon Gitter](https://gitter.im/ceylon/user?utm_source=share-link&utm_medium=link&utm_campaign=share-link) chat room,
 we can very easily implement `Iterable` so that we can iterate/map/filter/... over an `InvariantTuple` directly:
 
-```ceylon
+{% highlight ceylon %}
 shared class InvariantTuple<Element, First, Rest = []>(
     shared Tuple<Element, First, Rest> tuple)
         satisfies Iterable<Element> {
@@ -395,7 +395,7 @@ shared void render<Element, First, Rest>(
     
     write(html.string);
 }
-```
+{% endhighlight %}
 
 Much better! Bu this is still a little bit naive... we cannot, for example, include page snippets from different 
 sources... or provide a custom CSS stylesheet... as with all software, there's always something we could do better!
@@ -429,7 +429,7 @@ subject of research that no practical language has been able to incorporate (und
 
 > to use `Date` for the `dob` field, the Ceylon SDK module `ceylon.time` must be imported.
 
-```ceylon
+{% highlight ceylon %}
 shared class Name {
     shared actual String string;
     
@@ -449,14 +449,14 @@ shared class FullName(shared Name lastName,
 
 shared class Person(shared FullName fullName,
                     shared Date dob) {}
-```
+{% endhighlight %}
 
 So, currently, a `Person` has a `fullName` and a `dob`. a `FullName` always contains a `lastName`, but may also contain
 a `firstName` and a list of `otherNames`.
 
 The following are examples of valid `Person` instances:
 
-```ceylon
+{% highlight ceylon %}
 value person1 = Person(FullName(name("Jordan")),
                        date(1963, 2, 17));
 
@@ -469,17 +469,17 @@ value person3 = Person(FullName {
         lastName = name("Jordan");
     },
     date(1963, 2, 17));
-```
+{% endhighlight %}
 
 Now, we add a new field to `Person` that will make it possible to add new attributes to it without losing type-safety.
 
-```ceylon
+{% highlight ceylon %}
 class Person<out Attribute>(
         shared FullName fullName, 
         shared Date dob,
         shared {Attribute*} attributes = {})
             given Attribute satisfies Object {}
-```
+{% endhighlight %}
 
 The generic type parameters ensure that under a module which has certain requirements on the `Person` object, we can
 get a type-safe representation of its attributes.
@@ -494,7 +494,7 @@ Let's have a look how at how we can use attributes.
 For example, in the `legal` module, we will be interested only in the *legal* attributes of a `Person`, so when we want
 to access that, we must `narrow` the attributes and see if its there:
 
-```ceylon
+{% highlight ceylon %}
 // define the legal module's attributes
 shared class SocialSecurityNumber(shared actual String string) {}
 shared class Nationality(shared actual String string) {}
@@ -516,7 +516,7 @@ if (legalAttributes.size == 1, exists attributes = legalAttributes.first) {
     print("``person4.fullName`` has SSN ``ssn``
            and nationality ``nationality``");
 }
-```
+{% endhighlight %}
 
 In the example above, `person4` has `LegalAttributes`, but also has a `String`-typed attribute that just represents
 here the unknown type of the other attributes of a `Person` which may be kept by other modules.
@@ -529,7 +529,7 @@ Ceylon has reified generics (besides powerful type inference).
 We could now define *medical* attributes to a person, so that the `medical.details` module also has its own
 module-specific attributes:
 
-```ceylon
+{% highlight ceylon %}
 shared class Allergies(shared {String*} substances) {
     string = substances.string;
 }
@@ -557,36 +557,36 @@ if (medicalAttributes.size == 1, exists attributes = medicalAttributes.first) {
     print("``person4.fullName`` has allergy to ``allergies.substances``
            and is currently taking ``currentMedication.medication``");
 }
-```
+{% endhighlight %}
 
 Notice that in the previous examples, two different methods were used to extract information from the
 attributes tuple: in the first, we deconstructed the tuple directly, in the second, we accessed the
 elements we were interested in by index. Unlike in most languages, both are completely type-safe:
 
-```ceylon
+{% highlight ceylon %}
 // deconstructing the legal attributes Tuple with types declared explicitly
 value [SocialSecurityNumber ssn, Nationality nationality] = attributes;
-```
+{% endhighlight %}
 
-```ceylon
+{% highlight ceylon %}
 // accessing medical attributes using type-safe index syntax
 // notice that if the types of the elements didn't match, this just wouldn't compile!
 Allergies allergies = attributes[0];
 CurrentMedication currentMedication = attributes[2];
-```
+{% endhighlight %}
 
 In both examples, explicitly declaring the types has the exact same effect as letting Ceylon infer the types. Both are
 completely type-safe.
 
 If you attempt to access an index that does not exist, the returned element will be `null`:
 
-```ceylon
+{% highlight ceylon %}
 // DOES NOT COMPILE
 CurrentMedication currentMedication = attributes[3];
 
 // OK, but useless
 Null doesNotExist = attributes[3];
-```
+{% endhighlight %}
 
 This should be enough for us to represent a `Person` quite well, with module-specific attributes making our code
 really modular, while at the same time allowing us to evolve the model in the future much more easily. Just imagine
@@ -608,7 +608,7 @@ That's quite easy!
 First, we need some functions that turn each type we're interested in adding to the report we will show to the user
 into a `String`:
 
-```ceylon
+{% highlight ceylon %}
 String renderedName(FullName fullName)
     => "``fullName.lastName``\
         ``if (exists fn = fullName.firstName)
@@ -632,24 +632,24 @@ String renderedMedication(CurrentMedication? medication)
             (if (m.medication.empty) then "None"
              else m.medication.string)
        else "UNKNOWN";
-```
+{% endhighlight %}
 
 In which module each function should be located is left as an exercise to the reader ;)
 
 Now we can define the headers of the table we want to display, as well as the type of the cells which will form the
 rows of the table:
 
-```ceylon
+{% highlight ceylon %}
 value headerNames = ["Full name", "Date of birth", "SSN",
                      "Allergies", "Current Medication"];
 
 alias RenderableRow => [FullName, Date, SocialSecurityNumber?, 
                         Allergies?, CurrentMedication?];
-```
+{% endhighlight %}
 
 Each `Person<Anything>` instance needs to be turned into a `RenderableRow`, which our renderer knows how to render:
 
-```ceylon
+{% highlight ceylon %}
 RenderableRow personRow(Person<Anything> person) {
     value legalAttributes = person.attributes.narrow<LegalAttributes>();
     value medicalAttributes = person.attributes.narrow<MedicalAttributes>();
@@ -665,13 +665,13 @@ RenderableRow personRow(Person<Anything> person) {
     
     return [person.fullName, person.dob, ssn, *medicalColumns];
 }
-```
+{% endhighlight %}
 
 Next, we define a function that takes a `{Person<Anything>*}` stream, which would probably come from whatever data store
 we had at our disposal, turn that into a `{RenderableRow*}` stream and, finally, call the `render` function with the
 headers and this stream of rows (if there's at least one row):
 
-```ceylon
+{% highlight ceylon %}
 void renderPeople({Person<Anything>*} people) {
     value data = people.map(personRow)
             .map((pr) => [renderedName(pr[0]), renderedDate(pr[1]),
@@ -687,11 +687,11 @@ void renderPeople({Person<Anything>*} people) {
         print("No people were found");
     }
 }
-```
+{% endhighlight %}
 
 That's it... we can test the code with a small example:
 
-```ceylon
+{% highlight ceylon %}
 value person1 = Person {
     fullName = FullName(name("Smith"));
     dob = date(1984, 12, 21);
@@ -714,11 +714,11 @@ value person2 = Person {
 };
 
 renderPeople {person1, person2};
-```
+{% endhighlight %}
 
 Which prints this:
 
-```html
+{% highlight html %}
 <!DOCTYPE html>
 
 <html>
@@ -756,7 +756,7 @@ Which prints this:
 </table>
 </body>
 </html>
-```
+{% endhighlight %}
 
 ### Extending the system
 
@@ -778,7 +778,7 @@ To add support for these values, first we need to add a new module called `medic
 the functions above (with the return type explicitly declared, as that's mandatory in Ceylon for `shared` functions)
 as well as a new attribute to be added to `Person`:
 
-```ceylon
+{% highlight ceylon %}
 shared alias Kilogram => Integer;
 shared alias Meter => Float;
 
@@ -795,11 +795,11 @@ shared Float bmi(Kilogram weight, Meter height)
 
 shared Boolean overweight(Kilogram weight, Meter height)
         => bmi(weight, height) > 25.0;
-```
+{% endhighlight %}
 
 Now we can use this in the web module. We add the new field `overweight` to the headers and row definitions:
 
-```ceylon
+{% highlight ceylon %}
 alias Overweight => Boolean;
 
 value headerNames = ["Full name", "Date of birth", "SSN",
@@ -808,7 +808,7 @@ value headerNames = ["Full name", "Date of birth", "SSN",
 
 alias RenderableRow => [FullName, Date, SocialSecurityNumber?, 
                         Overweight?, Allergies?, CurrentMedication?];
-```
+{% endhighlight %}
 
 Once we do that, all the code used to create the table data will not compile anymore, as the types will be wrong!
 This is really good. We just can't get this wrong. The type system won't let us!
@@ -816,18 +816,18 @@ This is really good. We just can't get this wrong. The type system won't let us!
 Now we just need to fix the errors the compiler complains about. First, the `personRow` function now returns something
 that does not match the type `RenderableRow`, which it should return... what the compiler says is:
 
-```ceylon
+{% highlight ceylon %}
 Returned expression must be assignable to return type of personRow:
 [FullName, Date, SocialSecurityNumber?, Allergies?, CurrentMedication?] is not assignable to
 RenderableRow ([FullName, Date, SocialSecurityNumber?, Boolean?, Allergies?, CurrentMedication?])
-```
+{% endhighlight %}
 
 Reading the error above carefully, we notice that the expected type has the `Boolean?` item which is missing in the
 actualy type (would be nice if the compiler told us the alias `Overweight?` was missing!!). That's still quite helpful.
 
 So let's add the new value to each row:
 
-```ceylon
+{% highlight ceylon %}
 RenderableRow personRow(Person<Anything> person) {
     value legalAttributes = person.attributes.narrow<LegalAttributes>();
     value medicalAttributes = person.attributes.narrow<MedicalAttributes>();
@@ -851,7 +851,7 @@ RenderableRow personRow(Person<Anything> person) {
     // **added personOverweight to the returned tuple!**
     return [person.fullName, person.dob, ssn, personOverweight, *medicalColumns];
 }
-```
+{% endhighlight %}
 
 The only thing that still does not compile is the `renderPeople` function... the error is on the call to `render`:
 the headers and cells's types no longer match... there's one cell column missing!
@@ -873,7 +873,7 @@ could not *make it work*!
 
 But we can make it work by just adding the new column to the data:
 
-```ceylon
+{% highlight ceylon %}
 // one more render function for the new column
 String renderedOverweight(Boolean? overweight)
     => if (exists o = overweight) then
@@ -900,7 +900,7 @@ void renderPeople({Person<Anything>*} people) {
         print("No people were found");
     }
 }
-```
+{% endhighlight %}
 
 Now everything compiles, and we can be quite safe that our modifications have worked, and that we did not forget to
 add the new column anywhere! If we did, we can be certain that the compiler would yell at us.
@@ -911,7 +911,7 @@ The compiler did not tell us about it because we made the `Measurements` attribu
 We could easily make them mandatory, and I hope you will be able to figure out how... but to make sure our current
 code works, let's add measurements to one of the people and see what gets printed:
 
-```ceylon
+{% highlight ceylon %}
 value person1 = Person {
     fullName = FullName(name("Smith"));
     dob = date(1984, 12, 21);
@@ -933,11 +933,11 @@ value person2 = Person {
         Measurements { weight = 98; height = 1.98; }
     ];
 };
-```
+{% endhighlight %}
 
 Running it gives:
 
-```html
+{% highlight html %}
 <!DOCTYPE html>
 
 <html>
@@ -978,7 +978,7 @@ Running it gives:
 </table>
 </body>
 </html>
-```
+{% endhighlight %}
 
 Not that we needed to run this to know it would work! Well, maybe I'm being a little too radical now... but I hope
 you agree that's a pretty comfortable position you find yourself in when your compiler can catch so many errors for
