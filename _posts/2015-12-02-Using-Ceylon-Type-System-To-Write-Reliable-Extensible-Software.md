@@ -1,4 +1,7 @@
-# Using Ceylon's Type System to write reliable, extensible software
+---
+layout: post
+title: Using Ceylon's Type System to write reliable, extensible software
+---
 
 > This blog post assumes a little familiarity with Ceylon... to learn the basics, take the
   [Tour of Ceylon](http://ceylon-lang.org/documentation/1.2/tour/) or at least skim through my
