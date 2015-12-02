@@ -1,5 +1,10 @@
 # Using Ceylon's Type System to write reliable, extensible software
 
+> This blog post assumes a little familiarity with Ceylon... to learn the basics, take the
+  [Tour of Ceylon](http://ceylon-lang.org/documentation/1.2/tour/) or at least skim through my
+  [Learn Programming in Ceylon](https://renatoathaydes.github.io/Learn-Programming-In-Ceylon-Part-1/) series,
+  which is targeted at beginners, before reading this.
+
 Ceylon has a really powerful type system that allows programmers to express concepts that are just impossible with
 most other type systems.
 
@@ -350,9 +355,17 @@ if (exists fileHandle) {
 As a final improvement, we should stop using String concatenation to create the HTML page and start using the more
 proper, type-safe tool for the job, which is the `ceylon.html` module!
 
-We also give the type parameter more appropriate names than A, B, C.
+We also give the type parameter more appropriate names than A, B, C... and, as suggested by @lucaswerkmeister in the
+[Ceylon Gitter](https://gitter.im/ceylon/user?utm_source=share-link&utm_medium=link&utm_campaign=share-link) chat room,
+we can very easily implement `Iterable` so that we can iterate/map/filter/... over an `InvariantTuple` directly:
 
 ```ceylon
+shared class InvariantTuple<Element, First, Rest = []>(
+    shared Tuple<Element, First, Rest> tuple)
+        satisfies Iterable<Element> {
+    iterator = tuple.iterator;
+}
+
 shared void render<Element, First, Rest>(
     Anything(String) write,
     InvariantTuple<Element, First, Rest> headers,
@@ -369,9 +382,9 @@ shared void render<Element, First, Rest>(
         Body {
             H1("Medical Web App"),
             Table {
-                header = headers.tuple.map(asString).map(Th);
+                header = headers.map(asString).map(Th);
                 rows = cells.map((row) => Tr {
-                    row.tuple.map(asString).map(Td)
+                    row.map(asString).map(Td)
                 });
             }
         };
@@ -381,9 +394,14 @@ shared void render<Element, First, Rest>(
 }
 ```
 
-This is still a little bit naive... we cannot, for example, include page snippets from different sources... or provide
-a custom CSS stylesheet... but to keep this blog post within a reasonable size, let's move on and see how we can
-represent the data.
+Much better! Bu this is still a little bit naive... we cannot, for example, include page snippets from different 
+sources... or provide a custom CSS stylesheet... as with all software, there's always something we could do better!
+
+> One improvement to the `render` function would be to actually make it a little simpler and only write the HTML table,
+  so that another part of the application must take care of the rest! That part of the application could worry about
+  details such as style-sheets.
+
+But to keep this blog post within a reasonable size, let's move on and see how we can represent the data.
 
 ### Representing the data
 
@@ -963,9 +981,14 @@ Not that we needed to run this to know it would work! Well, maybe I'm being a li
 you agree that's a pretty comfortable position you find yourself in when your compiler can catch so many errors for
 you, making it pretty difficult to mess things up!
 
+## Final Remarks
+
 There's a lot more to the Ceylon type system and this only scratches the surface. I hope to write more about this in
 the future and that you're now at least curious to try out this incredible language, if you haven't done that yet...
 and if you have, I hope you've learned some new tricks.
 
-Let me know what you think.
+The code used in this blog post [is on GitHub](https://github.com/renatoathaydes/ceylon-medical-web-app)!
 
+> On the GitHub page, press `t` to show all files, then have a look at each one!
+
+Let me know what you think!
