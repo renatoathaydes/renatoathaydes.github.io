@@ -305,13 +305,12 @@ still keeping the length of the types bound together. This can be done as shown 
 ];
 
 // convert the data tuples to string tuples of the same length
-value stringData = data.map((row)
-    => [row[0].string, row[1].string, row[2].string]);
+value stringData = data.map((item)
+    => [item[0].string, item[1].string, item[2].string]);
 
 // render the converted tuples... the header length must match the rows' lengths
-render(process.write, 
-    header(["Name", "Weight", "Height"]), 
-    stringData.map(row));
+render(header(["Name", "Weight", "Height"]), 
+       stringData.map(row));
 {% endhighlight %}
 
 Going back to our problem... we now know how to write an extremely generic renderer. But we just rendered the HTML
@@ -397,7 +396,9 @@ shared void render<Element, First, Rest>(
 }
 {% endhighlight %}
 
-Much better! Bu this is still a little bit naive... we cannot, for example, include page snippets from different 
+Much better!
+
+But this is still a little bit naive... we cannot, for example, include page snippets from different 
 sources... or provide a custom CSS stylesheet... as with all software, there's always something we could do better!
 
 > One improvement to the `render` function would be to actually make it a little simpler and only write the HTML table,
@@ -492,7 +493,7 @@ attribute (which would be the case if we did not bound the type parameter)! We c
 Let's have a look how at how we can use attributes.
 
 For example, in the `legal` module, we will be interested only in the *legal* attributes of a `Person`, so when we want
-to access that, we must `narrow` the attributes and see if its there:
+to access that, we must `narrow` the attributes and see if it's there:
 
 {% highlight ceylon %}
 // define the legal module's attributes
@@ -500,7 +501,7 @@ shared class SocialSecurityNumber(shared actual String string) {}
 shared class Nationality(shared actual String string) {}
 shared alias LegalAttributes => [SocialSecurityNumber, Nationality];
 
-// create a person with legal attributes some other module's attributes
+// create a person with legal attributes + some other module's attributes
 value person4 = Person(FullName(name("Smith")),
     date(1984, 12, 21), {
         [SocialSecurityNumber("555-555-xxx"), Nationality("New Zealand")],
@@ -986,9 +987,28 @@ you, making it pretty difficult to mess things up!
 
 ## Final Remarks
 
-There's a lot more to the Ceylon type system and this only scratches the surface. I hope to write more about this in
-the future and that you're now at least curious to try out this incredible language, if you haven't done that yet...
-and if you have, I hope you've learned some new tricks.
+I've read somewhere that type systems are only useful to catch typos in the code... this horrified me! To think that
+someone would, as this sentence implies, program **only** in a language that cannot even detect typos for them makes
+me wonder just how many other, much more subtle errors, are making it into production.
+
+I believe that this blog post thoroughly shows just how much more powerful than a typo-detector a type system can be!
+The amount of bugs that can be completely ruled out just by ensuring that the program compiles is amazing
+(null-reference-access, method-does-not-exist, property-does-not-exist, casting-error,
+ length-of-headers-and-rows-does-not-match, wrong-number-of-arguments, wrong-type-of-arguments...).
+
+With the last section, I demonstrated that a type-safe system can be as flexible as the designer wants, allowing the
+addition, removal or modification of parts of the system to remain as easy as it can be. No need to throw out the window all
+guarantees the type system gives us, especially one so powerful.
+
+We must rely upon such tools if we are to write something at least a little bit reliable after a few iterations of
+requirement changes, team changes and all the nice things one can expect with almost certainty during the lifetime of
+any reasonably successful system.
+
+And as type systems come, I think that Ceylon's type system is up there with the best you can find,
+perhaps at the very top for practical, general-purpose languages.
+
+I hope to write more about it in the future. And I also hope that you're now at least curious to
+[try out](http://trybeta.ceylon-lang.org/) this incredible language if you haven't done that yet.
 
 The code used in this blog post [is on GitHub](https://github.com/renatoathaydes/ceylon-medical-web-app)!
 
