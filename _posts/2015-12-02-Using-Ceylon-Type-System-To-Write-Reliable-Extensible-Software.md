@@ -1014,4 +1014,4 @@ The code used in this blog post [is on GitHub](https://github.com/renatoathaydes
 
 > On the GitHub page, press `t` to show all files, then have a look at each one!
 
-Let me know what you think!
+Let me know what you think on [Reddit](https://www.reddit.com/r/programming/comments/3vbd70/using_ceylons_type_system_to_write_reliable/)!
