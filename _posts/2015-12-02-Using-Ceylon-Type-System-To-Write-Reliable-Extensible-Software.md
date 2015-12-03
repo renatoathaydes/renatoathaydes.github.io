@@ -27,7 +27,7 @@ But not like this:
 
 {% highlight ceylon %}
 // does not compile!
-take {}
+take {};
 {% endhighlight %}
 
 A possibly empty stream of Strings would be `{String*}` rather than `{String+}`.
@@ -75,7 +75,9 @@ be re-written like this:
 {% highlight ceylon %}
 alias Successful => Success<Result?>;
 alias Outcome => Error|Successful;
-    
+
+{Outcome*} results = ...
+
 {Result*} successes = results.narrow<Successful>()*.result.coalesced;
 {% endhighlight %}
 
