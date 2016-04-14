@@ -390,10 +390,10 @@ You could even ask the user to enter numbers to use in the calculation:
 {% highlight ceylon %}
 process.write("Enter a number (x): ");
 value userX = process.readLine();
-value x = parseFloat(userX);
+value x = parseFloat(userX else "");
 process.write("Enter a number (y): ");
 value userY = process.readLine();
-value y = parseFloat(userY);
+value y = parseFloat(userY else "");
 
 if (exists x, exists y) {
     print("``x`` * ``y`` = ``x * y``");
