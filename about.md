@@ -1,6 +1,7 @@
 ---
 layout: page
 title: About
+permalink: /about/
 ---
 
 Hi! I am a Software Developer working at SmartBear Software doing what I like most: writing software
